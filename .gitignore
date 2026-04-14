@@ -1,0 +1,56 @@
+# =========================
+# Root-level ignore rules
+# =========================
+
+# Dependencies
+node_modules/
+BE/node_modules/
+FE/node_modules/
+
+# Build output and coverage
+coverage/
+dist/
+build/
+BE/coverage/
+FE/dist/
+FE/.vite/
+FE/.cache/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+BE/.env
+BE/.env.*
+!BE/.env.example
+FE/.env
+FE/.env.*
+!FE/.env.example
+
+# Logs and runtime files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary uploads / local runtime storage
+BE/uploads/
+BE/tmp/
+
+# OS and editor files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Package manager caches
+.npm/
+.pnpm-store/
+.yarn/
