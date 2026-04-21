@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const env = require('./config/env');
+const { checkDatabaseConnection } = require('./config/db');
 
 const app = express();
 
@@ -19,11 +20,20 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
+app.get('/api/health', async (req, res) => {
+  let databaseStatus = 'connected';
+
+  try {
+    await checkDatabaseConnection();
+  } catch (error) {
+    databaseStatus = 'disconnected';
+  }
+
+  res.status(databaseStatus === 'connected' ? 200 : 503).json({
+    status: databaseStatus === 'connected' ? 'ok' : 'degraded',
     service: 'mendingmana-backend',
     environment: env.nodeEnv,
+    database: databaseStatus,
     timestamp: new Date().toISOString(),
   });
 });

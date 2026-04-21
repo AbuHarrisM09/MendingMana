@@ -6,6 +6,15 @@ const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT) || 5000,
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  db: {
+    user: process.env.DB_USER || 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME || 'mendingmana_db',
+    password: process.env.DB_PASSWORD || '1234',
+    port: Number(process.env.DB_PORT) || 5432,
+    ssl: process.env.DB_SSL === 'true',
+    connectionString: process.env.DATABASE_URL || null,
+  },
 };
 
 module.exports = env;
