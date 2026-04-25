@@ -1,9 +1,11 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
-const { findUserByEmail } = require('../models/userModel');
+const { findUserByEmail, findRoleByName, createUser } = require('../models/userModel');
 
 const LOGIN_ALLOWED_ROLES = new Set(['member', 'admin']);
+const REGISTER_ALLOWED_ROLE = 'member';
+const MIN_PASSWORD_LENGTH = 6;
 
 function isUserTemporarilyBanned(bannedUntil) {
   if (!bannedUntil) {
@@ -79,6 +81,74 @@ async function loginUser({ email, password }) {
   };
 }
 
+async function registerUser({ fullName, email, password }) {
+  const existingUser = await findUserByEmail(email);
+
+  if (existingUser) {
+    return {
+      success: false,
+      statusCode: 409,
+      message: 'Email sudah terdaftar.',
+    };
+  }
+
+  const memberRole = await findRoleByName(REGISTER_ALLOWED_ROLE);
+
+  if (!memberRole) {
+    return {
+      success: false,
+      statusCode: 500,
+      message: 'Role member belum tersedia di database.',
+    };
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const savedUser = await createUser({
+    fullName,
+    email,
+    passwordHash,
+    roleId: memberRole.id,
+  });
+
+  return {
+    success: true,
+    statusCode: 201,
+    message: 'Registrasi berhasil.',
+    data: {
+      user: {
+        id: savedUser.id,
+        fullName: savedUser.full_name,
+        email: savedUser.email,
+        role: memberRole.name,
+      },
+    },
+  };
+}
+
+function validateRegisterPayload({ fullName, email, password }) {
+  if (!fullName || !email || !password) {
+    return 'Nama lengkap, email, dan password wajib diisi.';
+  }
+
+  if (String(fullName).trim().length < 3) {
+    return 'Nama lengkap minimal 3 karakter.';
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(String(email).trim())) {
+    return 'Format email tidak valid.';
+  }
+
+  if (String(password).length < MIN_PASSWORD_LENGTH) {
+    return `Password minimal ${MIN_PASSWORD_LENGTH} karakter.`;
+  }
+
+  return null;
+}
+
 module.exports = {
   loginUser,
+  registerUser,
+  validateRegisterPayload,
 };

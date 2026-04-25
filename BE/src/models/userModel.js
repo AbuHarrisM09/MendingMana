@@ -21,6 +21,31 @@ async function findUserByEmail(email) {
   return rows[0] || null;
 }
 
+async function findRoleByName(roleName) {
+  const sql = `
+    SELECT id, name
+    FROM roles
+    WHERE name = $1
+    LIMIT 1
+  `;
+
+  const { rows } = await query(sql, [roleName]);
+  return rows[0] || null;
+}
+
+async function createUser({ fullName, email, passwordHash, roleId, username = null }) {
+  const sql = `
+    INSERT INTO users (full_name, username, email, password_hash, role_id, is_verified)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING id, full_name, email, role_id
+  `;
+
+  const { rows } = await query(sql, [fullName, username, email, passwordHash, roleId, true]);
+  return rows[0];
+}
+
 module.exports = {
   findUserByEmail,
+  findRoleByName,
+  createUser,
 };
