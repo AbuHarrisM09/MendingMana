@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
+import UserDashboard from '../views/UserDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,6 +10,11 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
+      component: HomeView
+    },
+    {
+      path: '/login',
+      name: 'login',
       component: LoginView
     },
     {
@@ -15,6 +22,12 @@ const router = createRouter({
       name: 'admin',
       component: AdminDashboard,
       meta: { requiresAuth: true, role: 'admin' }
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: UserDashboard,
+      meta: { requiresAuth: true, role: 'member' }
     }
   ]
 })
@@ -24,12 +37,18 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const role = localStorage.getItem('role')
 
+  // If already logged in, keep user away from login page
+  if (to.name === 'login' && token) {
+    return next(role === 'admin' ? '/admin' : '/')
+  }
+
   if (to.meta.requiresAuth) {
     if (!token) {
-      return next('/')
+      return next('/login')
     }
     if (to.meta.role && to.meta.role !== role) {
-      return next('/') // Or redirect to a 403 page
+      // Fallback redirect based on current role
+      return next(role === 'admin' ? '/admin' : '/')
     }
   }
 

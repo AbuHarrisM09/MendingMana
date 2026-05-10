@@ -30,10 +30,14 @@ const isSubmitting = ref(false);
 const requestError = ref("");
 const requestSuccess = ref("");
 
-function setMode(mode) {
+function setMode(mode, options = {}) {
+  const { keepSuccess = false } = options;
+
   authMode.value = mode;
   requestError.value = "";
-  requestSuccess.value = "";
+  if (!keepSuccess) {
+    requestSuccess.value = "";
+  }
   clearErrors();
 }
 
@@ -127,6 +131,8 @@ async function handleSubmit() {
     if (authMode.value === "login") {
       localStorage.setItem("token", result.token);
       localStorage.setItem("role", result.user?.role || "member");
+      localStorage.setItem("userFullName", result.user?.fullName || "");
+      localStorage.setItem("userEmail", result.user?.email || "");
 
       if (result.user?.role === "admin") {
         router.push("/admin");
@@ -138,7 +144,8 @@ async function handleSubmit() {
       registerForm.email = "";
       registerForm.password = "";
       registerForm.confirmPassword = "";
-      setMode("login");
+      // Pindah ke login tapi tetap tampilkan pesan sukses
+      setMode("login", { keepSuccess: true });
     }
   } catch (error) {
     requestError.value = error.message;

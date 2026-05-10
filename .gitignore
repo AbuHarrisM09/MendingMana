@@ -6,6 +6,7 @@
 node_modules/
 BE/node_modules/
 FE/node_modules/
+postman/
 patokan/
 
 # Build output and coverage

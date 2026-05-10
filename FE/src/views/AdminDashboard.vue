@@ -85,13 +85,10 @@
             <ArrowRight class="w-4 h-4 text-slate-300" />
           </div>
           <p class="text-slate-800 text-3xl font-extrabold">
-            {{ data.reviews.total }}
+            {{ data.overview.totalReviews }}
           </p>
           <p class="text-slate-600 text-sm font-semibold">Total Ulasan</p>
-          <p class="text-slate-400 text-xs mt-0.5">
-            {{ data.reviews.approved }} disetujui,
-            {{ data.reviews.rejected }} ditolak
-          </p>
+          <p class="text-slate-400 text-xs mt-0.5">Total ulasan terverifikasi</p>
         </div>
 
         <!-- Perlu Moderasi -->
@@ -107,7 +104,7 @@
             <ArrowRight class="w-4 h-4 text-slate-300" />
           </div>
           <p class="text-slate-800 text-3xl font-extrabold">
-            {{ data.reviews.pending }}
+            {{ data.overview.pendingModeration }}
           </p>
           <p class="text-slate-600 text-sm font-semibold">Perlu Moderasi</p>
           <p class="text-slate-400 text-xs mt-0.5">
@@ -140,7 +137,7 @@
                 <div
                   class="h-full bg-green-500"
                   :style="{
-                    width: getPercentage(data.sentiment.positive) + '%',
+                    width: data.sentiment.positivePercent + '%',
                   }"
                 ></div>
               </div>
@@ -157,7 +154,7 @@
                 <div
                   class="h-full bg-yellow-500"
                   :style="{
-                    width: getPercentage(data.sentiment.neutral) + '%',
+                    width: data.sentiment.neutralPercent + '%',
                   }"
                 ></div>
               </div>
@@ -174,7 +171,7 @@
                 <div
                   class="h-full bg-red-500"
                   :style="{
-                    width: getPercentage(data.sentiment.negative) + '%',
+                    width: data.sentiment.negativePercent + '%',
                   }"
                 ></div>
               </div>
@@ -214,7 +211,7 @@
                       {{ review.gadget_name || "Gadget" }}
                     </p>
                     <p class="text-xs text-slate-500 mt-1 line-clamp-2">
-                      {{ review.review_text }}
+                      {{ review.content_preview }}
                     </p>
                   </div>
                   <div
@@ -270,10 +267,11 @@ onMounted(async () => {
       },
     });
 
-    if (response.data.status === "success") {
-      data.value = response.data.data;
+    const payload = response.data?.data ?? response.data;
+    if (payload?.overview && payload?.sentiment) {
+      data.value = payload;
     } else {
-      error.value = "Gagal memuat data dashboard.";
+      error.value = response.data?.message || "Gagal memuat data dashboard.";
     }
   } catch (err) {
     if (err.response?.status === 401 || err.response?.status === 403) {
@@ -281,17 +279,16 @@ onMounted(async () => {
       localStorage.removeItem("role");
       router.push("/");
     } else {
-      error.value = "Terjadi kesalahan server saat mengambil data.";
+      error.value =
+        err.response?.data?.message ||
+        "Terjadi kesalahan server saat mengambil data.";
     }
   } finally {
     loading.value = false;
   }
 });
 
-function getPercentage(value) {
-  if (!data.value || data.value.reviews.total === 0) return 0;
-  return (value / data.value.reviews.total) * 100;
-}
+// Persentase sentimen sudah dihitung di backend (positivePercent, dst.)
 
 function logout() {
   localStorage.removeItem("token");
