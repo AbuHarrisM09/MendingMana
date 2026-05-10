@@ -5,6 +5,8 @@ const { query, pool } = require('../config/db');
 
 const SALT_ROUNDS = 10;
 
+const tableColumnCache = new Map();
+
 function slugify(value) {
   return value
     .toLowerCase()
@@ -23,6 +25,59 @@ function mapCategoryName(name) {
   const normalized = name.trim();
   if (normalized.toLowerCase() === 'aksesori') return 'Accessory';
   return normalized;
+}
+
+async function getTableColumns(tableName) {
+  if (tableColumnCache.has(tableName)) return tableColumnCache.get(tableName);
+
+  const result = await query(
+    `SELECT column_name, is_nullable, column_default
+     FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = $1`,
+    [tableName],
+  );
+
+  const columns = new Map();
+  for (const row of result.rows) {
+    columns.set(row.column_name, {
+      isNullable: row.is_nullable === 'YES',
+      hasDefault: row.column_default != null,
+      columnDefault: row.column_default,
+    });
+  }
+
+  tableColumnCache.set(tableName, columns);
+  return columns;
+}
+
+function buildSummary(text, maxLen = 180) {
+  if (!text) return null;
+  const normalized = String(text).trim().replace(/\s+/g, ' ');
+  if (normalized.length <= maxLen) return normalized;
+  return normalized.slice(0, maxLen - 1).trimEnd() + '…';
+}
+
+function addIfColumnExists(columns, pairs, columnName, value) {
+  if (!columns.has(columnName)) return;
+  pairs.push([columnName, value]);
+}
+
+function computeRequiredFallback(columns, columnName, gadget, brandId, categoryId) {
+  if (!columns.has(columnName)) return undefined;
+  const meta = columns.get(columnName);
+  if (meta.isNullable || meta.hasDefault) return undefined;
+
+  if (columnName === 'brand') return gadget.brand || null;
+  if (columnName === 'category') return mapCategoryName(gadget.category) || null;
+  if (columnName === 'brand_id') return brandId ?? null;
+  if (columnName === 'category_id') return categoryId ?? null;
+  if (columnName === 'status') return 'published';
+  if (columnName === 'stock') return 0;
+  if (columnName === 'currency_code') return 'IDR';
+  if (columnName === 'average_rating') return gadget.averageRating || 0;
+  if (columnName === 'total_reviews') return gadget.totalReviews || 0;
+
+  return undefined;
 }
 
 async function loadMockData() {
@@ -111,55 +166,69 @@ async function upsertUser(seedUser) {
 }
 
 async function upsertGadget(gadget, brandId, categoryId) {
-  const slug = `${slugify(gadget.name)}-${slugify(gadget.brand)}`;
+  const columns = await getTableColumns('gadgets');
 
-  const sql = `
-    INSERT INTO gadgets (
-      category_id,
-      brand_id,
-      name,
-      slug,
-      model,
-      price,
-      release_date,
-      description,
-      average_rating,
-      total_reviews,
-      status
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-    ON CONFLICT (slug)
-    DO UPDATE SET
-      category_id = EXCLUDED.category_id,
-      brand_id = EXCLUDED.brand_id,
-      name = EXCLUDED.name,
-      model = EXCLUDED.model,
-      price = EXCLUDED.price,
-      release_date = EXCLUDED.release_date,
-      description = EXCLUDED.description,
-      average_rating = EXCLUDED.average_rating,
-      total_reviews = EXCLUDED.total_reviews,
-      status = EXCLUDED.status,
-      updated_at = NOW()
+  const rawSlug = `${slugify(gadget.name)}-${slugify(gadget.brand)}`;
+  const slug = rawSlug.slice(0, 180);
+
+  const existing = await query('SELECT id FROM gadgets WHERE slug = $1 ORDER BY id ASC LIMIT 1', [slug]);
+
+  const pairs = [];
+  addIfColumnExists(columns, pairs, 'name', gadget.name);
+  addIfColumnExists(columns, pairs, 'slug', slug);
+  addIfColumnExists(columns, pairs, 'model', gadget.model || null);
+  addIfColumnExists(columns, pairs, 'price', gadget.price || null);
+  addIfColumnExists(columns, pairs, 'release_date', gadget.releaseDate || null);
+  addIfColumnExists(columns, pairs, 'description', gadget.description || null);
+  addIfColumnExists(columns, pairs, 'summary', buildSummary(gadget.description));
+  addIfColumnExists(columns, pairs, 'average_rating', gadget.averageRating || 0);
+  addIfColumnExists(columns, pairs, 'total_reviews', gadget.totalReviews || 0);
+  addIfColumnExists(columns, pairs, 'status', 'published');
+  addIfColumnExists(columns, pairs, 'brand_id', brandId);
+  addIfColumnExists(columns, pairs, 'category_id', categoryId);
+  addIfColumnExists(columns, pairs, 'brand', gadget.brand || null);
+  addIfColumnExists(columns, pairs, 'category', mapCategoryName(gadget.category) || null);
+
+  // Ensure we provide a value for required columns without defaults.
+  for (const columnName of columns.keys()) {
+    const fallback = computeRequiredFallback(columns, columnName, gadget, brandId, categoryId);
+    if (fallback === undefined) continue;
+    if (pairs.some(([name]) => name === columnName)) continue;
+    pairs.push([columnName, fallback]);
+  }
+
+  const allowed = pairs.filter(([_, v]) => v !== undefined);
+  const colNames = allowed.map(([k]) => k);
+  const colValues = allowed.map(([_, v]) => v);
+  const placeholders = colValues.map((_, idx) => `$${idx + 1}`);
+
+  if (existing.rows[0]) {
+    const updatePairs = allowed.filter(([name]) => name !== 'slug');
+    if (updatePairs.length === 0) return existing.rows[0].id;
+
+    const updateColNames = updatePairs.map(([name]) => name);
+    const updateValues = updatePairs.map(([_, value]) => value);
+    const setClauses = updateColNames.map((c, idx) => `${c} = $${idx + 1}`);
+
+    const updateSql = `
+      UPDATE gadgets
+      SET ${setClauses.join(', ')}, updated_at = NOW()
+      WHERE id = $${updateValues.length + 1}
+      RETURNING id
+    `;
+
+    const update = await query(updateSql, [...updateValues, existing.rows[0].id]);
+    return update.rows[0].id;
+  }
+
+  const insertSql = `
+    INSERT INTO gadgets (${colNames.join(', ')})
+    VALUES (${placeholders.join(', ')})
     RETURNING id
   `;
 
-  const values = [
-    categoryId,
-    brandId,
-    gadget.name,
-    slug,
-    gadget.model || null,
-    gadget.price || null,
-    gadget.releaseDate || null,
-    gadget.description || null,
-    gadget.averageRating || 0,
-    gadget.totalReviews || 0,
-    'published',
-  ];
-
-  const result = await query(sql, values);
-  return result.rows[0].id;
+  const insert = await query(insertSql, colValues);
+  return insert.rows[0].id;
 }
 
 async function ensureGadgetSpecs(gadgetId, specs = []) {
@@ -256,8 +325,14 @@ async function ensureReview(review, gadgetId, userId) {
 }
 
 async function ensureWishlist(userId, gadgetId) {
+  const exists = await query(
+    'SELECT 1 FROM saved_gadgets WHERE user_id = $1 AND gadget_id = $2 LIMIT 1',
+    [userId, gadgetId],
+  );
+  if (exists.rows[0]) return;
+
   await query(
-    'INSERT INTO saved_gadgets (user_id, gadget_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+    'INSERT INTO saved_gadgets (user_id, gadget_id) VALUES ($1, $2)',
     [userId, gadgetId],
   );
 }

@@ -1,5 +1,14 @@
 const { pool } = require('../config/db');
 
+async function getGadgetsColumns(client) {
+  const result = await client.query(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'gadgets'`,
+  );
+  return new Set(result.rows.map((r) => r.column_name));
+}
+
 // Get all gadgets
 exports.getGadgets = async (req, res) => {
   try {
@@ -53,16 +62,44 @@ exports.createGadget = async (req, res) => {
 
     await client.query('BEGIN');
 
+    const gadgetColumns = await getGadgetsColumns(client);
+
+    // Jika skema DB punya kolom text brand/category yang wajib, isi dari tabel relasi
+    let brandName = null;
+    let categoryName = null;
+    if (gadgetColumns.has('brand')) {
+      const brandRes = await client.query('SELECT name FROM brands WHERE id = $1 LIMIT 1', [brand_id]);
+      brandName = brandRes.rows[0]?.name || null;
+    }
+    if (gadgetColumns.has('category')) {
+      const categoryRes = await client.query('SELECT name FROM categories WHERE id = $1 LIMIT 1', [category_id]);
+      categoryName = categoryRes.rows[0]?.name || null;
+    }
+
     // Buat slug
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
 
-    // 2. Insert gadget
+    // 2. Insert gadget (adaptif terhadap kolom yang ada)
+    const columns = ['category_id', 'brand_id', 'name', 'slug', 'model', 'price', 'description', 'status'];
+    const values = [category_id, brand_id, name, slug, model || null, price || null, description || null, status || 'published'];
+
+    if (gadgetColumns.has('brand')) {
+      columns.push('brand');
+      values.push(brandName);
+    }
+    if (gadgetColumns.has('category')) {
+      columns.push('category');
+      values.push(categoryName);
+    }
+
+    const placeholders = values.map((_, idx) => `$${idx + 1}`).join(', ');
     const insertGadgetQ = `
-      INSERT INTO gadgets (category_id, brand_id, name, slug, model, price, description, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO gadgets (${columns.join(', ')})
+      VALUES (${placeholders})
       RETURNING *;
     `;
-    const gadgetValues = [category_id, brand_id, name, slug, model, price, description, status || 'published'];
+
+    const gadgetValues = values;
     const gadgetRes = await client.query(insertGadgetQ, gadgetValues);
     const newGadget = gadgetRes.rows[0];
 
