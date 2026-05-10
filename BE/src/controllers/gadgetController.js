@@ -27,7 +27,7 @@ exports.getGadgets = async (req, res) => {
       brand: r.brand_name,
       category: r.category_name,
       price: Number(r.price),
-      images: r.images ? r.images.map(img => img.startsWith('http') ? img : http://localhost:5000${img}) : [],
+      images: r.images ? r.images.map(img => img.startsWith('http') ? img : `http://localhost:5000${img}`) : [],
       description: r.description,
       releaseDate: r.release_date,
       averageRating: Number(r.average_rating),
@@ -70,10 +70,10 @@ exports.createGadget = async (req, res) => {
     if (files && files.length > 0) {
       for (const file of files) {
         // file_url diakses di frontend menggunakan path /uploads/...
-        const fileUrl = /uploads/${file.filename};
+        const fileUrl = `/uploads/${file.filename}`;
         
         await client.query(
-          INSERT INTO gadget_media (gadget_id, media_type, file_url, is_primary) VALUES ($1, $2, $3, $4),
+          `INSERT INTO gadget_media (gadget_id, media_type, file_url, is_primary) VALUES ($1, $2, $3, $4)`,
           [newGadget.id, 'image', fileUrl, true]
         );
       }
