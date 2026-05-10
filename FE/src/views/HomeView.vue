@@ -7,7 +7,7 @@
             <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
               <Cpu class="w-5 h-5 text-white" />
             </div>
-            <span class="text-blue-600 tracking-tight font-bold text-lg">Mending Mana</span>
+            <span class="text-blue-600 tracking-tight font-bold text-lg hidden sm:block">Mending Mana</span>
           </div>
 
           <!-- Quick search simplified for structure -->
@@ -31,29 +31,30 @@
               </span>
               <button
                 v-if="role === 'admin'"
-                class="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2"
+                class="px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2"
                 @click="goAdmin"
               >
-                <Shield class="w-4 h-4" /> Admin
+                <Shield class="w-4 h-4" /> <span class="hidden sm:inline">Admin</span>
               </button>
               <button
                 v-else
-                class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2"
+                class="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2"
                 @click="goDashboard"
               >
-                <LayoutDashboard class="w-4 h-4" /> Dashboard
+                <LayoutDashboard class="w-4 h-4" /> <span class="hidden sm:inline">Dashboard</span>
               </button>
               <button
-                class="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors"
+                class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors"
                 @click="logout"
               >
-                Logout
+                <span class="hidden sm:inline">Logout</span>
+                <span class="sm:hidden">Keluar</span>
               </button>
             </template>
 
             <template v-else>
               <button
-                class="px-4 py-2 text-blue-600 border border-blue-600 rounded-xl text-sm font-semibold hover:bg-blue-50 transition-colors"
+                class="px-4 py-1.5 sm:py-2 text-blue-600 border border-blue-600 rounded-xl text-sm font-semibold hover:bg-blue-50 transition-colors"
                 @click="goLogin"
               >
                 Masuk
@@ -125,11 +126,25 @@
     </section>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <!-- Mobile Search -->
+      <div class="md:hidden mb-8 relative">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <Search class="h-5 w-5 text-slate-400" />
+        </div>
+        <input
+          v-model="searchQuery"
+          @keyup.enter="handleSearch"
+          type="text"
+          class="block w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl bg-white shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base transition-all"
+          placeholder="Cari gadget..."
+        />
+      </div>
+
       <!-- Categories -->
-      <div class="mb-12">
-        <h2 class="text-xl font-bold text-slate-800 mb-6 font-display">Kategori Gadget</h2>
-        <div class="flex flex-wrap gap-3">
+      <div class="mb-8 md:mb-12">
+        <h2 class="text-xl font-bold text-slate-800 mb-4 sm:mb-6 font-display">Kategori Gadget</h2>
+        <div class="flex overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 sm:flex-wrap gap-3 scroll-smooth" style="scrollbar-width: none;">
           <button
             v-for="cat in categories"
             :key="cat.value"
