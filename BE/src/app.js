@@ -4,8 +4,13 @@ const env = require('./config/env');
 const { checkDatabaseConnection } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const gadgetRoutes = require('./routes/gadgetRoutes');
+const path = require('path');
 
 const app = express();
+
+// Ekspos folder uploads secara statis agar foto bisa diakses dengan URL
+app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
 
 app.use(
   cors({
@@ -16,6 +21,7 @@ app.use(
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/gadgets', gadgetRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({
