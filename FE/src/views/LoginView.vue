@@ -157,51 +157,34 @@ async function handleSubmit() {
 
 <template>
   <main
-    class="relative min-h-screen overflow-hidden bg-stone-950 text-stone-100"
+    class="relative min-h-screen overflow-hidden bg-stone-50 font-sans text-stone-900 antialiased"
   >
     <div class="pointer-events-none absolute inset-0">
       <div
-        class="absolute -left-16 top-10 h-52 w-52 rounded-full bg-orange-500/20 blur-3xl"
+        class="absolute -left-16 top-10 h-52 w-52 rounded-full bg-orange-200/60 blur-3xl"
       ></div>
       <div
-        class="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-cyan-500/15 blur-3xl"
+        class="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-cyan-200/50 blur-3xl"
       ></div>
       <div
-        class="absolute left-1/3 top-1/3 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl"
+        class="absolute left-1/3 top-1/3 h-56 w-56 rounded-full bg-emerald-200/50 blur-3xl"
       ></div>
     </div>
 
     <section
       class="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-10 px-6 py-12 lg:flex-row lg:items-center lg:gap-16"
     >
-      <div class="max-w-xl">
-        <p
-          class="inline-flex rounded-full border border-orange-300/25 bg-orange-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-orange-200"
-        >
-          MendingMana
-        </p>
-        <h1
-          class="mt-5 text-4xl font-bold leading-tight text-white sm:text-5xl"
-        >
-          Masuk dan lanjutkan eksplorasi gadget terbaik.
-        </h1>
-        <p class="mt-5 text-base leading-relaxed text-stone-300">
-          Login untuk memberi rating, menulis ulasan, menyimpan gadget favorit,
-          dan menggunakan fitur komparasi produk secara lengkap.
-        </p>
-      </div>
-
       <div
-        class="w-full max-w-md rounded-3xl border border-stone-700/70 bg-stone-900/80 p-7 shadow-2xl backdrop-blur-sm sm:p-8"
+        class="w-full max-w-md rounded-3xl border border-stone-200 bg-white p-7 shadow-xl sm:p-8"
       >
-        <div class="grid grid-cols-2 gap-2 rounded-xl bg-stone-800/80 p-1">
+        <div class="grid grid-cols-2 gap-2 rounded-xl bg-stone-100 p-1">
           <button
             type="button"
             class="rounded-lg px-3 py-2 text-sm font-semibold transition"
             :class="
               authMode === 'login'
-                ? 'bg-orange-300 text-stone-950'
-                : 'text-stone-300 hover:bg-stone-700'
+                ? 'bg-orange-500 text-white'
+                : 'text-stone-600 hover:bg-white'
             "
             @click="setMode('login')"
           >
@@ -212,8 +195,8 @@ async function handleSubmit() {
             class="rounded-lg px-3 py-2 text-sm font-semibold transition"
             :class="
               authMode === 'register'
-                ? 'bg-orange-300 text-stone-950'
-                : 'text-stone-300 hover:bg-stone-700'
+                ? 'bg-orange-500 text-white'
+                : 'text-stone-600 hover:bg-white'
             "
             @click="setMode('register')"
           >
@@ -221,10 +204,12 @@ async function handleSubmit() {
           </button>
         </div>
 
-        <h2 class="mt-5 text-2xl font-semibold text-white">
+        <Transition name="fade" mode="out-in">
+          <div :key="authMode">
+            <h2 class="mt-5 text-2xl font-semibold text-stone-900">
           {{ authMode === "login" ? "Login Akun" : "Buat Akun Baru" }}
         </h2>
-        <p class="mt-1 text-sm text-stone-400">
+        <p class="mt-1 text-sm text-stone-500">
           {{
             authMode === "login"
               ? "Gunakan email dan password yang sudah terdaftar."
@@ -236,7 +221,7 @@ async function handleSubmit() {
           <div v-if="authMode === 'register'">
             <label
               for="fullName"
-              class="mb-2 block text-sm font-medium text-stone-200"
+              class="mb-2 block text-sm font-medium text-stone-700"
               >Nama Lengkap</label
             >
             <input
@@ -245,7 +230,7 @@ async function handleSubmit() {
               type="text"
               autocomplete="name"
               placeholder="Nama lengkap"
-              class="w-full rounded-xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+              class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
             />
             <p v-if="fieldErrors.fullName" class="mt-2 text-xs text-rose-300">
               {{ fieldErrors.fullName }}
@@ -255,7 +240,7 @@ async function handleSubmit() {
           <div>
             <label
               for="email"
-              class="mb-2 block text-sm font-medium text-stone-200"
+              class="mb-2 block text-sm font-medium text-stone-700"
               >Email</label
             >
             <input
@@ -265,7 +250,7 @@ async function handleSubmit() {
               type="email"
               autocomplete="email"
               placeholder="nama@email.com"
-              class="w-full rounded-xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+              class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
             />
             <input
               v-else
@@ -274,9 +259,9 @@ async function handleSubmit() {
               type="email"
               autocomplete="email"
               placeholder="nama@email.com"
-              class="w-full rounded-xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+              class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
             />
-            <p v-if="fieldErrors.email" class="mt-2 text-xs text-rose-300">
+            <p v-if="fieldErrors.email" class="mt-2 text-xs text-rose-600">
               {{ fieldErrors.email }}
             </p>
           </div>
@@ -284,7 +269,7 @@ async function handleSubmit() {
           <div>
             <label
               for="password"
-              class="mb-2 block text-sm font-medium text-stone-200"
+              class="mb-2 block text-sm font-medium text-stone-700"
               >Password</label
             >
             <div class="relative">
@@ -295,7 +280,7 @@ async function handleSubmit() {
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="current-password"
                 placeholder="Masukkan password"
-                class="w-full rounded-xl border border-stone-700 bg-stone-950/70 px-4 py-3 pr-20 text-sm text-stone-100 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+                class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 pr-20 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
               />
               <input
                 v-else
@@ -304,17 +289,17 @@ async function handleSubmit() {
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="new-password"
                 placeholder="Masukkan password"
-                class="w-full rounded-xl border border-stone-700 bg-stone-950/70 px-4 py-3 pr-20 text-sm text-stone-100 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+                class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 pr-20 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
               />
               <button
                 type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-stone-300 hover:bg-stone-800"
+                class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-stone-600 hover:bg-stone-100"
                 @click="showPassword = !showPassword"
               >
                 {{ showPassword ? "Hide" : "Show" }}
               </button>
             </div>
-            <p v-if="fieldErrors.password" class="mt-2 text-xs text-rose-300">
+            <p v-if="fieldErrors.password" class="mt-2 text-xs text-rose-600">
               {{ fieldErrors.password }}
             </p>
           </div>
@@ -322,7 +307,7 @@ async function handleSubmit() {
           <div v-if="authMode === 'register'">
             <label
               for="confirmPassword"
-              class="mb-2 block text-sm font-medium text-stone-200"
+              class="mb-2 block text-sm font-medium text-stone-700"
               >Konfirmasi Password</label
             >
             <input
@@ -331,11 +316,11 @@ async function handleSubmit() {
               :type="showPassword ? 'text' : 'password'"
               autocomplete="new-password"
               placeholder="Ulangi password"
-              class="w-full rounded-xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+              class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
             />
             <p
               v-if="fieldErrors.confirmPassword"
-              class="mt-2 text-xs text-rose-300"
+              class="mt-2 text-xs text-rose-600"
             >
               {{ fieldErrors.confirmPassword }}
             </p>
@@ -345,29 +330,29 @@ async function handleSubmit() {
             v-if="authMode === 'login'"
             class="flex items-center justify-between text-sm"
           >
-            <label class="inline-flex items-center gap-2 text-stone-300">
+            <label class="inline-flex items-center gap-2 text-stone-600">
               <input
                 type="checkbox"
-                class="h-4 w-4 rounded border-stone-700 bg-stone-900 text-orange-400"
+                class="h-4 w-4 rounded border-stone-300 bg-white text-orange-500"
               />
               Ingat saya
             </label>
             <a
               href="#"
-              class="font-medium text-orange-300 hover:text-orange-200"
+              class="font-medium text-orange-600 hover:text-orange-500"
               >Lupa password?</a
             >
           </div>
 
           <p
             v-if="requestError"
-            class="rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+            class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
           >
             {{ requestError }}
           </p>
           <p
             v-if="requestSuccess"
-            class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200"
+            class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
           >
             {{ requestSuccess }}
           </p>
@@ -375,7 +360,7 @@ async function handleSubmit() {
           <button
             type="submit"
             :disabled="isSubmitting"
-            class="w-full rounded-xl bg-orange-300 px-4 py-3 text-sm font-bold text-stone-950 transition hover:bg-orange-200 disabled:cursor-not-allowed disabled:opacity-70"
+            class="w-full rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {{
               isSubmitting
@@ -389,28 +374,43 @@ async function handleSubmit() {
 
         <p
           v-if="authMode === 'login'"
-          class="mt-6 text-center text-sm text-stone-400"
+          class="mt-6 text-center text-sm text-stone-500"
         >
           Belum punya akun?
           <button
             type="button"
-            class="font-semibold text-orange-300 hover:text-orange-200"
+            class="font-semibold text-orange-600 hover:text-orange-500"
             @click="setMode('register')"
           >
             Daftar di sini
           </button>
         </p>
-        <p v-else class="mt-6 text-center text-sm text-stone-400">
+        <p v-else class="mt-6 text-center text-sm text-stone-500">
           Sudah punya akun?
           <button
             type="button"
-            class="font-semibold text-orange-300 hover:text-orange-200"
+            class="font-semibold text-orange-600 hover:text-orange-500"
             @click="setMode('login')"
           >
             Masuk di sini
           </button>
         </p>
+          </div>
+        </Transition>
       </div>
     </section>
   </main>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>
