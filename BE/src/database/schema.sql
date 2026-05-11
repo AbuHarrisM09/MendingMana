@@ -295,9 +295,20 @@ ALTER TABLE review_reports
   ADD COLUMN IF NOT EXISTS handled_by BIGINT REFERENCES users(id),
   ADD COLUMN IF NOT EXISTS handled_note TEXT;
 
-UPDATE review_reports
-SET reporter_user_id = user_id
-WHERE reporter_user_id IS NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'review_reports'
+      AND column_name = 'user_id'
+  ) THEN
+    UPDATE review_reports
+    SET reporter_user_id = user_id
+    WHERE reporter_user_id IS NULL;
+  END IF;
+END;
+$$;
 
 UPDATE review_reports
 SET reason_code = 'other'
