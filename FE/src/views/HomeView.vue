@@ -218,9 +218,9 @@ import { mockGadgets, formatPrice } from '../data/mockData.js'
 
 const router = useRouter()
 
-const token = computed(() => localStorage.getItem('token') || '')
-const role = computed(() => localStorage.getItem('role') || '')
-const userName = computed(() => localStorage.getItem('userFullName') || '')
+const token = ref(localStorage.getItem('token') || '')
+const role = ref(localStorage.getItem('role') || '')
+const userName = ref(localStorage.getItem('userFullName') || '')
 const isAuthenticated = computed(() => Boolean(token.value))
 
 function goLogin() { router.push('/login') }
@@ -232,7 +232,14 @@ function logout() {
   localStorage.removeItem('role')
   localStorage.removeItem('userFullName')
   localStorage.removeItem('userEmail')
-  router.push('/')
+  
+  token.value = ''
+  role.value = ''
+  userName.value = ''
+  
+  if (router.currentRoute.value.path !== '/') {
+    router.push('/')
+  }
 }
 
 const searchQuery = ref('')
