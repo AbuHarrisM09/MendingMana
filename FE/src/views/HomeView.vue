@@ -149,15 +149,37 @@
             v-for="cat in categories"
             :key="cat.value"
             @click="handleCategoryClick(cat.value)"
-            class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105"
+            class="group relative flex items-center gap-3 px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl transition-all duration-300 outline-none shrink-0 border"
             :class="[
               activeCategory === cat.value
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-600 ring-offset-2 ring-offset-slate-50'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/30 scale-105 z-10'
+                : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-sm hover:-translate-y-0.5'
             ]"
           >
-            <component :is="cat.icon" class="w-4 h-4" />
-            {{ cat.label }}
+            <div 
+              class="relative flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300"
+              :class="[
+                activeCategory === cat.value 
+                  ? 'bg-white/20 shadow-inner' 
+                  : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-blue-600 group-hover:shadow-sm'
+              ]"
+            >
+              <component 
+                :is="cat.icon" 
+                class="w-4 h-4 transition-transform duration-300"
+                :class="activeCategory === cat.value ? 'scale-110 drop-shadow-sm text-white' : 'group-hover:scale-110 group-hover:rotate-3'"
+              />
+            </div>
+            
+            <span 
+              class="font-bold text-sm tracking-wide transition-colors duration-300" 
+              :class="activeCategory === cat.value ? 'text-white' : 'group-hover:text-blue-700'"
+            >
+              {{ cat.label }}
+            </span>
+            
+            <!-- Inactive Hover Accent -->
+            <div v-if="activeCategory !== cat.value" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-500 rounded-t-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>
         </div>
       </div>
