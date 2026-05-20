@@ -8,6 +8,7 @@ BE/node_modules/
 FE/node_modules/
 postman/
 patokan/
+design.md
 
 # Build output and coverage
 coverage/
