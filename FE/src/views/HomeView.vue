@@ -227,7 +227,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   Cpu, Search, SlidersHorizontal, TrendingUp, ChevronRight,
@@ -236,9 +236,24 @@ import {
 
 import GadgetCard from '../components/gadgets/GadgetCard.vue'
 import StarRating from '../components/gadgets/StarRating.vue'
-import { mockGadgets, formatPrice } from '../data/mockData.js'
+import { formatPrice } from '../data/mockData.js'
+import { getGadgets } from '../services/gadgetService.js'
 
 const router = useRouter()
+
+const gadgets = ref([])
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const data = await getGadgets()
+    gadgets.value = data
+  } catch (error) {
+    console.error('Failed to load gadgets:', error)
+  } finally {
+    loading.value = false
+  }
+})
 
 const token = ref(localStorage.getItem('token') || '')
 const role = ref(localStorage.getItem('role') || '')
@@ -276,16 +291,16 @@ const categories = [
   { label: "Smartwatch", value: "Smartwatch", icon: Watch },
 ]
 
-const trendingGadgets = computed(() => mockGadgets.filter(g => g.isTrending).slice(0, 3))
-const heroGadget = computed(() => trendingGadgets.value[0] || mockGadgets[0])
+const trendingGadgets = computed(() => gadgets.value.filter(g => g.isTrending).slice(0, 3))
+const heroGadget = computed(() => trendingGadgets.value[0] || gadgets.value[0])
 
 const filteredGadgets = computed(() => {
-  return mockGadgets.filter(g => {
+  return gadgets.value.filter(g => {
     const matchCat = activeCategory.value === 'all' || g.category === activeCategory.value
     const matchSearch = !searchQuery.value ||
-      g.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      g.brand.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      g.category.toLowerCase().includes(searchQuery.value.toLowerCase())
+      (g.name && g.name.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
+      (g.brand && g.brand.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
+      (g.category && g.category.toLowerCase().includes(searchQuery.value.toLowerCase()))
     
     return matchCat && matchSearch
   })
