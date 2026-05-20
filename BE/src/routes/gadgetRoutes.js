@@ -8,6 +8,9 @@ const router = express.Router();
 // Publik: list gadgets
 router.get('/', gadgetController.getGadgets);
 
+// Publik: gadget detail
+router.get('/:id', gadgetController.getGadgetById);
+
 // Admin: create gadget + upload multi images
 router.post(
 	'/',

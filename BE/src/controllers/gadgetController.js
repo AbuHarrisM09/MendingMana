@@ -1,5 +1,32 @@
 const { pool } = require('../config/db');
 
+function formatGadgetRow(row) {
+  return {
+    id: `g-${row.id}`,
+    name: row.name,
+    brand: row.brand_name,
+    category: row.category_name,
+    price: Number(row.price),
+    images: row.images
+      ? row.images.map((img) => (img.startsWith('http') ? img : `http://localhost:5000${img}`))
+      : [],
+    description: row.description,
+    summary: row.summary,
+    releaseDate: row.release_date,
+    averageRating: Number(row.average_rating),
+    totalReviews: Number(row.total_reviews),
+    isNew: true,
+    isTrending: true,
+  };
+}
+
+function parseGadgetId(value) {
+  if (!value) return null;
+  const cleaned = String(value).startsWith('g-') ? String(value).slice(2) : String(value);
+  const parsed = Number.parseInt(cleaned, 10);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
 async function getGadgetsColumns(client) {
   const result = await client.query(
     `SELECT column_name
@@ -30,20 +57,7 @@ exports.getGadgets = async (req, res) => {
     const { rows } = await pool.query(query);
     
     // Format response to match frontend model
-    const gadgets = rows.map(r => ({
-      id: "g-" + r.id, // match frontend convention for now
-      name: r.name,
-      brand: r.brand_name,
-      category: r.category_name,
-      price: Number(r.price),
-      images: r.images ? r.images.map(img => img.startsWith('http') ? img : `http://localhost:5000${img}`) : [],
-      description: r.description,
-      releaseDate: r.release_date,
-      averageRating: Number(r.average_rating),
-      totalReviews: Number(r.total_reviews),
-      isNew: true, // simplified
-      isTrending: true // simplified
-    }));
+    const gadgets = rows.map(formatGadgetRow);
 
     res.status(200).json(gadgets);
   } catch (err) {
@@ -124,5 +138,53 @@ exports.createGadget = async (req, res) => {
     res.status(500).json({ message: 'Gagal menambahkan gadget' });
   } finally {
     client.release();
+  }
+};
+
+// Get gadget detail by id
+exports.getGadgetById = async (req, res) => {
+  try {
+    const gadgetId = parseGadgetId(req.params.id);
+    if (!gadgetId) {
+      return res.status(400).json({ message: 'ID gadget tidak valid' });
+    }
+
+    const query = `
+      SELECT 
+        g.*,
+        b.name as brand_name,
+        c.name as category_name,
+        (
+          SELECT json_agg(file_url)
+          FROM gadget_media gm
+          WHERE gm.gadget_id = g.id
+        ) as images
+      FROM gadgets g
+      LEFT JOIN brands b ON g.brand_id = b.id
+      LEFT JOIN categories c ON g.category_id = c.id
+      WHERE g.id = $1
+      LIMIT 1
+    `;
+
+    const { rows } = await pool.query(query, [gadgetId]);
+    if (!rows.length) {
+      return res.status(404).json({ message: 'Gadget tidak ditemukan' });
+    }
+
+    const specsQuery = `
+      SELECT spec_group, spec_key, spec_value, value_type, display_order
+      FROM gadget_specs
+      WHERE gadget_id = $1
+      ORDER BY display_order ASC, spec_key ASC
+    `;
+    const specsResult = await pool.query(specsQuery, [gadgetId]);
+
+    const gadget = formatGadgetRow(rows[0]);
+    gadget.specs = specsResult.rows;
+
+    res.status(200).json(gadget);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Terjadi kesalahan pada server' });
   }
 };
