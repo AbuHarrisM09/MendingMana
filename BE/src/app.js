@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const gadgetRoutes = require('./routes/gadgetRoutes');
 const userRoutes = require('./routes/userRoutes');
+const compareRoutes = require('./routes/compareRoutes');
 const path = require('path');
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/gadgets', gadgetRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/compare', compareRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({
