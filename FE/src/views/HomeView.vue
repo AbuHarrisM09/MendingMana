@@ -156,12 +156,12 @@
             />
             
             <!-- Floating detail cards -->
-            <div class="absolute bottom-10 -left-10 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl animate-fade-in-up delay-600" style="opacity:0; animation-fill-mode: forwards;">
+            <div class="absolute z-20 bottom-10 -left-10 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl animate-fade-in-up delay-600" style="opacity:0; animation-fill-mode: forwards;">
               <div class="text-xs text-slate-500 font-medium mb-1">Harga Mulai</div>
               <div class="text-lg font-extrabold text-slate-900">{{ formatPrice(heroGadget.price) }}</div>
             </div>
             
-            <div class="absolute top-20 -right-4 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl flex items-center gap-3 animate-fade-in-up delay-800" style="opacity:0; animation-fill-mode: forwards;">
+            <div class="absolute z-20 top-20 -right-4 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl flex items-center gap-3 animate-fade-in-up delay-800" style="opacity:0; animation-fill-mode: forwards;">
               <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
                 <Star class="w-5 h-5 text-amber-500 fill-current" />
               </div>
@@ -182,7 +182,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
           <!-- Search (mobile) -->
-          <form @submit.prevent="handleSearch" class="w-full md:w-80">
+          <form @submit.prevent="handleSearch" class="w-full md:hidden">
             <div class="relative group">
               <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               <input
@@ -202,7 +202,7 @@
           </form>
 
           <!-- Categories -->
-          <div class="flex-1 w-full overflow-x-auto hide-scrollbar">
+          <div class="flex-1 min-w-0 w-full md:w-auto overflow-x-auto hide-scrollbar">
             <div class="flex gap-2 min-w-max px-1">
               <button
                 v-for="cat in categories"
