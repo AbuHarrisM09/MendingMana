@@ -5,6 +5,10 @@ const { authenticate, requireRole } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
+// Publik: metadata lists (Categories & Brands)
+router.get('/categories', gadgetController.getCategories);
+router.get('/brands', gadgetController.getBrands);
+
 // Publik: list gadgets
 router.get('/', gadgetController.getGadgets);
 
@@ -18,6 +22,23 @@ router.post(
 	requireRole('admin'),
 	upload.array('images', 5),
 	gadgetController.createGadget,
+);
+
+// Admin: update gadget + upload multi images (optional)
+router.put(
+	'/:id',
+	authenticate,
+	requireRole('admin'),
+	upload.array('images', 5),
+	gadgetController.updateGadget,
+);
+
+// Admin: delete gadget
+router.delete(
+	'/:id',
+	authenticate,
+	requireRole('admin'),
+	gadgetController.deleteGadget,
 );
 
 module.exports = router;
