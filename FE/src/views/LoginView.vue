@@ -86,15 +86,6 @@ function validateRegisterForm() {
   return isValid;
 }
 
-function quickLogin(role) {
-  if (role === 'admin') {
-    loginForm.email = 'admin@mendingmana.id';
-    loginForm.password = 'admin123';
-  } else {
-    loginForm.email = 'budi@email.com';
-    loginForm.password = 'password123';
-  }
-}
 
 async function handleSubmit() {
   requestError.value = "";
@@ -169,29 +160,7 @@ async function handleSubmit() {
               <h2 class="text-slate-800 mb-1 font-extrabold text-xl">Selamat Datang!</h2>
               <p class="text-slate-500 text-sm mb-6">Masuk ke akun Mending Mana Anda</p>
 
-              <!-- Quick login buttons -->
-              <div class="flex gap-2 mb-5">
-                <button
-                  type="button"
-                  @click="quickLogin('admin')"
-                  class="flex-1 px-3 py-2.5 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl hover:bg-red-100 transition-colors font-bold"
-                >
-                  Demo Admin
-                </button>
-                <button
-                  type="button"
-                  @click="quickLogin('member')"
-                  class="flex-1 px-3 py-2.5 bg-blue-50 border border-blue-200 text-blue-600 text-xs rounded-xl hover:bg-blue-100 transition-colors font-bold"
-                >
-                  Demo Member
-                </button>
-              </div>
 
-              <div class="flex items-center gap-3 mb-5">
-                <div class="flex-1 h-px bg-slate-200"></div>
-                <span class="text-slate-400 text-xs font-medium">atau masuk dengan email</span>
-                <div class="flex-1 h-px bg-slate-200"></div>
-              </div>
 
               <form @submit.prevent="handleSubmit" class="space-y-4">
                 <div>
