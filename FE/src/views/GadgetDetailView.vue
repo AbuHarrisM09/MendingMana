@@ -142,6 +142,7 @@
           <!-- CTA Buttons -->
           <div class="flex gap-4 mt-auto">
             <button
+              @click="$router.push('/compare?ids=' + gadget.id)"
               class="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold transition-all shadow-md bg-white/80 backdrop-blur-md border border-white text-slate-700 hover:bg-white hover:scale-[1.02]"
             >
               <GitCompare class="w-5 h-5" />
