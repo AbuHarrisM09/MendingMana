@@ -26,30 +26,47 @@
 
           <div class="flex items-center gap-2">
             <template v-if="isAuthenticated">
-              <span class="hidden sm:inline text-sm text-slate-600">
-                Halo, <span class="font-semibold text-slate-800">{{ userName || 'Member' }}</span>
-              </span>
-              <button
-                v-if="role === 'admin'"
-                class="px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2"
-                @click="goAdmin"
-              >
-                <Shield class="w-4 h-4" /> <span class="hidden sm:inline">Admin</span>
-              </button>
-              <button
-                v-else
-                class="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2"
-                @click="goDashboard"
-              >
-                <LayoutDashboard class="w-4 h-4" /> <span class="hidden sm:inline">Dashboard</span>
-              </button>
-              <button
-                class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors"
-                @click="logout"
-              >
-                <span class="hidden sm:inline">Logout</span>
-                <span class="sm:hidden">Keluar</span>
-              </button>
+              <div class="relative ml-2">
+                <button
+                  @click="profileOpen = !profileOpen"
+                  class="flex items-center gap-2 px-2 py-1 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none"
+                >
+                  <img
+                    :src="userAvatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userName || 'Member') + '&background=0D8ABC&color=fff'"
+                    :alt="userName"
+                    class="w-8 h-8 rounded-full object-cover"
+                  />
+                  <span class="text-sm font-semibold text-slate-700 hidden sm:inline">{{ userName ? userName.split(' ')[0] : 'Member' }}</span>
+                  <ChevronDown class="w-4 h-4 text-slate-400 hidden sm:inline" />
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div v-show="profileOpen" class="absolute right-0 top-12 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50">
+                  <div class="px-4 py-2 border-b border-slate-100 mb-1">
+                    <p class="text-sm font-bold text-slate-800">{{ userName || 'Member' }}</p>
+                    <p class="text-xs text-slate-500">{{ userEmail || 'user@email.com' }}</p>
+                  </div>
+                  
+                  <template v-if="role === 'admin'">
+                    <button @click="goAdmin(); profileOpen = false" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 w-full text-left">
+                      <Shield class="w-4 h-4 text-red-500" /> Dashboard Admin
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button @click="goDashboard(); profileOpen = false" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 w-full text-left">
+                      <LayoutDashboard class="w-4 h-4 text-blue-500" /> Dashboard Saya
+                    </button>
+                    <button @click="goDashboardWishlist(); profileOpen = false" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 w-full text-left">
+                      <Heart class="w-4 h-4 text-pink-500" /> Wishlist Saya
+                    </button>
+                  </template>
+                  
+                  <hr class="my-1 border-slate-100" />
+                  <button @click="logout" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 w-full text-left transition-colors">
+                    <LogOut class="w-4 h-4" /> Keluar
+                  </button>
+                </div>
+              </div>
             </template>
 
             <template v-else>
@@ -227,11 +244,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   Cpu, Search, SlidersHorizontal, TrendingUp, ChevronRight,
-  Smartphone, Monitor, Tablet, Headphones, Watch, LayoutDashboard, Shield
+  Smartphone, Monitor, Tablet, Headphones, Watch, LayoutDashboard, Shield,
+  ChevronDown, LogOut, Heart
 } from 'lucide-vue-next'
 
 import GadgetCard from '../components/gadgets/GadgetCard.vue'
@@ -258,11 +276,41 @@ onMounted(async () => {
 const token = ref(localStorage.getItem('token') || '')
 const role = ref(localStorage.getItem('role') || '')
 const userName = ref(localStorage.getItem('userFullName') || '')
+const userEmail = ref(localStorage.getItem('userEmail') || 'user@email.com')
+const userAvatar = ref(localStorage.getItem('userAvatar') || '')
 const isAuthenticated = computed(() => Boolean(token.value))
+const profileOpen = ref(false)
+
+// Close profile dropdown when clicking outside
+const closeDropdown = (e) => {
+  if (profileOpen.value && !e.target.closest('.relative.ml-2')) {
+    profileOpen.value = false
+  }
+}
+
+onMounted(async () => {
+  document.addEventListener('click', closeDropdown)
+  try {
+    const data = await getGadgets()
+    gadgets.value = data
+  } catch (error) {
+    console.error('Failed to load gadgets:', error)
+  } finally {
+    loading.value = false
+  }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdown)
+})
 
 function goLogin() { router.push('/login') }
 function goAdmin() { router.push('/admin') }
 function goDashboard() { router.push('/dashboard') }
+function goDashboardWishlist() { 
+  // Assuming dashboard handles `#wishlist` query or we can just go to dashboard and let user switch tab
+  router.push('/dashboard') 
+}
 
 function logout() {
   localStorage.removeItem('token')
