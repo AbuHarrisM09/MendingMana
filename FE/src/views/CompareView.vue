@@ -81,7 +81,7 @@
         <div class="lg:col-span-3 space-y-6">
           
           <!-- Glassmorphic Header & Search Card -->
-          <div class="bg-white/70 backdrop-blur-xl border border-white shadow-xl shadow-slate-100/50 p-6 rounded-3xl animate-fade-in-up">
+          <div class="bg-white/70 backdrop-blur-xl border border-white shadow-xl shadow-slate-100/50 p-6 rounded-3xl animate-fade-in-up relative z-20">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Fitur Komparasi</span>
@@ -193,31 +193,8 @@
             </div>
             <h2 class="text-2xl font-extrabold text-slate-800">Mulai Perbandingan Gadget</h2>
             <p class="text-slate-500 mt-2 max-w-md mx-auto text-sm leading-relaxed">
-              Cari gadget pilihan Anda di kotak pencarian di atas, atau klik salah satu rekomendasi skenario tanding populer berikut.
+              Cari gadget pilihan Anda di kotak pencarian di atas untuk memulai perbandingan spesifikasi secara langsung.
             </p>
-            
-            <!-- Quick Match Recommendations -->
-            <div class="mt-8">
-              <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Tanding Populer Hari Ini</p>
-              <div class="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                <button
-                  v-for="(rec, idx) in matchRecommendations"
-                  :key="idx"
-                  @click="loadMatchup(rec.ids)"
-                  class="p-4 bg-white hover:bg-slate-50 border border-slate-100 hover:border-blue-200 rounded-2xl text-left transition-all hover:shadow-lg shadow-sm group hover:-translate-y-1"
-                >
-                  <div class="text-xs font-bold text-blue-600 mb-1 flex items-center gap-1">
-                    <Sparkles class="w-3 h-3" />
-                    <span>{{ rec.tag }}</span>
-                  </div>
-                  <p class="text-sm font-bold text-slate-800 group-hover:text-blue-700 transition-colors leading-snug">{{ rec.title }}</p>
-                  <p class="text-xs text-slate-400 mt-2 font-medium flex items-center justify-between">
-                    <span>Lihat tandingan</span>
-                    <Plus class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-500 transition-colors" />
-                  </p>
-                </button>
-              </div>
-            </div>
           </div>
 
           <!-- Loading Spinner during AJAX calculation -->
@@ -231,115 +208,12 @@
           </div>
 
           <!-- Comparison Table Render Matrix -->
-          <div v-else-if="comparedGadgetsData" class="bg-white/70 backdrop-blur-xl border border-white shadow-xl shadow-slate-100/50 rounded-3xl overflow-hidden animate-fade-in">
-            
-            <!-- Horizontal Swipe Helper (visible on mobile only) -->
-            <div class="md:hidden bg-blue-50/50 text-blue-700 px-4 py-2 border-b border-slate-100 flex items-center justify-center gap-1.5 text-xs font-semibold">
-              <ArrowRightLeft class="w-3.5 h-3.5" />
-              <span>Geser tabel ke kanan untuk melihat gadget lain</span>
-            </div>
+          <CompareMatrixTable
+            v-else-if="comparedGadgetsData"
+            :compared-gadgets-data="comparedGadgetsData"
+            @remove-gadget="removeGadgetFromCompare"
+          />
 
-            <!-- Scrollable Table Wrapper -->
-            <div class="overflow-x-auto custom-scrollbar">
-              <table class="w-full border-collapse text-left table-fixed min-w-[700px]">
-                <thead>
-                  <!-- Header Row: Brand Image and basic actions -->
-                  <tr class="bg-white/90 backdrop-blur-md sticky top-0 z-10 border-b border-slate-100 shadow-sm">
-                    <!-- Column 0: Empty corner -->
-                    <th class="w-56 p-6 font-bold text-slate-500 text-xs uppercase tracking-wider bg-slate-50/50 border-r border-slate-100">
-                      Gadget Info
-                    </th>
-                    <!-- Columns 1-N: Compared Gadgets -->
-                    <th
-                      v-for="gadget in comparedGadgetsData.gadgets"
-                      :key="gadget.id"
-                      class="p-6 relative group border-r border-slate-100 last:border-r-0"
-                    >
-                      <!-- Delete floating button -->
-                      <button
-                        @click="removeGadgetFromCompare(gadget.id)"
-                        class="absolute top-4 right-4 text-slate-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-full transition-all hover:scale-110"
-                        title="Hapus dari perbandingan"
-                      >
-                        <X class="w-4 h-4" />
-                      </button>
-
-                      <div class="flex flex-col items-center text-center mt-2">
-                        <!-- Image representation -->
-                        <div class="w-28 h-28 bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center p-2 border border-slate-100 group-hover:scale-105 transition-transform duration-300 shadow-sm">
-                          <img 
-                            :src="gadget.images && gadget.images[0] ? gadget.images[0] : 'https://images.unsplash.com/photo-1584006682522-dc17d6c0d9ac?w=150&h=150&fit=crop'" 
-                            class="max-w-full max-h-full object-contain" 
-                          />
-                        </div>
-
-                        <!-- Brand name -->
-                        <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mt-4">{{ gadget.brand }}</span>
-                        <!-- Gadget name -->
-                        <h3 class="text-sm font-extrabold text-slate-800 line-clamp-2 mt-1 px-2 h-10 leading-snug group-hover:text-blue-700 transition-colors">
-                          <router-link :to="'/gadget/' + gadget.id.replace('g-', '')" class="hover:underline">
-                            {{ gadget.name }}
-                          </router-link>
-                        </h3>
-
-                        <!-- Formatted Price -->
-                        <p class="text-sm font-extrabold text-slate-900 mt-2">{{ formatPrice(gadget.price) }}</p>
-
-                        <!-- Rating & Reviews snippet -->
-                        <div class="flex flex-col items-center gap-1 mt-2">
-                          <div class="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100">
-                            <Star class="w-3.5 h-3.5 text-amber-500 fill-current" />
-                            <span class="text-xs font-bold text-amber-700">{{ gadget.averageRating ? gadget.averageRating.toFixed(1) : '0.0' }}</span>
-                          </div>
-                          <span class="text-[10px] text-slate-400 font-medium">({{ gadget.totalReviews || 0 }} Ulasan)</span>
-                        </div>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Technical Spec Groups Loop -->
-                  <template v-for="group in comparedGadgetsData.specGroups" :key="group.group">
-                    <!-- Spec Category Section Header (sticky title or distinct row style) -->
-                    <tr class="bg-slate-50/80 backdrop-blur-sm border-y border-slate-100">
-                      <td 
-                        :colspan="comparedGadgetsData.gadgets.length + 1"
-                        class="px-6 py-3 text-xs font-black text-slate-900 uppercase tracking-wider"
-                      >
-                        {{ group.group }}
-                      </td>
-                    </tr>
-                    
-                    <!-- Spec Keys Loop inside the Group -->
-                    <tr
-                      v-for="spec in group.specs"
-                      :key="spec.key"
-                      class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors"
-                    >
-                      <!-- Key Label column -->
-                      <td class="p-4 px-6 text-xs font-bold text-slate-500 bg-slate-50/10 border-r border-slate-100 leading-relaxed">
-                        {{ spec.key }}
-                      </td>
-                      
-                      <!-- Gadget values side by side -->
-                      <td
-                        v-for="gadget in comparedGadgetsData.gadgets"
-                        :key="gadget.id"
-                        class="p-4 text-xs text-slate-700 border-r border-slate-100 last:border-r-0 leading-relaxed font-medium"
-                      >
-                        <span v-if="spec.values[gadget.id] !== null" class="break-words">
-                          {{ spec.values[gadget.id] }}
-                        </span>
-                        <span v-else class="text-slate-300 font-normal italic">
-                          —
-                        </span>
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
-          </div>
 
         </div>
 
@@ -347,95 +221,18 @@
         <div class="lg:col-span-1 space-y-6">
           
           <!-- Member Saved Comparisons List -->
-          <div class="bg-white/70 backdrop-blur-xl border border-white shadow-xl shadow-slate-100/50 p-6 rounded-3xl sticky top-24 animate-fade-in-up delay-200">
-            <div class="flex items-center gap-2 mb-4">
-              <History class="w-5 h-5 text-blue-600" />
-              <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">Komparasi Saya</h2>
-            </div>
-            
-            <hr class="border-slate-100 mb-4" />
+          <SavedSessionsSidebar
+            :is-member="isMember"
+            :loading-sessions="loadingSessions"
+            :sessions-list="sessionsList"
+            :active-session-id="activeSessionId"
+            :active-session-title="activeSessionTitle"
+            :format-date="formatDate"
+            @load-session="loadSavedSession"
+            @delete-session="confirmDeleteSession"
+            @login-redirect="goLogin"
+          />
 
-            <!-- Authentication check -->
-            <template v-if="isMember">
-              <!-- Loading state -->
-              <div v-if="loadingSessions" class="py-12 text-center">
-                <RefreshCw class="w-6 h-6 text-slate-400 animate-spin mx-auto mb-2" />
-                <p class="text-xs font-semibold text-slate-400">Memuat sesi tersimpan...</p>
-              </div>
-
-              <!-- Empty state inside sessions -->
-              <div v-else-if="sessionsList.length === 0" class="py-12 text-center px-4">
-                <FolderHeart class="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <h4 class="text-sm font-bold text-slate-700">Belum ada sesi</h4>
-                <p class="text-xs text-slate-400 mt-1 leading-relaxed">Pilih gadget, klik "Simpan Sesi" untuk menyimpan riwayat perbandingan.</p>
-              </div>
-
-              <!-- List representation -->
-              <div v-else class="space-y-3 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
-                <div 
-                  v-for="session in sessionsList" 
-                  :key="session.id"
-                  :class="[
-                    'p-3.5 rounded-2xl border text-left transition-all relative group flex flex-col gap-2 hover:shadow-md cursor-pointer hover:bg-white',
-                    activeSessionId === session.id
-                      ? 'border-blue-500 bg-blue-50/20 shadow-blue-500/5'
-                      : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'
-                  ]"
-                  @click="loadSavedSession(session)"
-                >
-                  <!-- Delete button for session (Member only) -->
-                  <button
-                    @click.stop="confirmDeleteSession(session)"
-                    class="absolute top-3 right-3 text-slate-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                    title="Hapus Sesi"
-                  >
-                    <Trash2 class="w-3.5 h-3.5" />
-                  </button>
-
-                  <div class="pr-6">
-                    <h4 class="text-xs font-extrabold text-slate-800 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
-                      {{ session.title }}
-                    </h4>
-                    <p class="text-[10px] text-slate-400 font-semibold mt-1">
-                      {{ formatDate(session.updatedAt) }}
-                    </p>
-                  </div>
-
-                  <!-- Small thumbnail avatars compared inside session -->
-                  <div class="flex items-center gap-1 mt-1 border-t border-slate-100/50 pt-2.5">
-                    <div 
-                      v-for="gadget in session.gadgets.slice(0, 3)" 
-                      :key="gadget.id"
-                      class="w-6 h-6 rounded-md bg-white border border-slate-100 p-0.5 overflow-hidden flex items-center justify-center shadow-sm"
-                      :title="gadget.name"
-                    >
-                      <img :src="gadget.image || 'https://images.unsplash.com/photo-1584006682522-dc17d6c0d9ac?w=40&h=40&fit=crop'" class="max-w-full max-h-full object-contain" />
-                    </div>
-                    <span v-if="session.gadgets.length > 3" class="text-[9px] font-black text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
-                      +{{ session.gadgets.length - 3 }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </template>
-
-            <!-- Non-member Guest Banner Prompt -->
-            <template v-else>
-              <div class="text-center p-4 bg-slate-50 border border-slate-100 rounded-2xl">
-                <FolderHeart class="w-10 h-10 text-blue-500/70 mx-auto mb-3" />
-                <h4 class="text-sm font-bold text-slate-800">Simpan Hasil Komparasi?</h4>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Gabung sebagai Member Mending Mana untuk menyimpan komparasi favorit, mengelolanya, dan membagikannya secara mudah!
-                </p>
-                <button
-                  @click="goLogin"
-                  class="mt-4 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/10 transition-colors"
-                >
-                  Masuk Sekarang
-                </button>
-              </div>
-            </template>
-          </div>
           
         </div>
 
@@ -443,76 +240,15 @@
     </main>
 
     <!-- Modal Dialog: Save Session Confirmation -->
-    <Transition name="fade">
-      <div v-show="saveModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" aria-modal="true" role="dialog">
-        <!-- Backdrop -->
-        <div @click="saveModalOpen = false" class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
+    <SaveSessionModal
+      :is-open="saveModalOpen"
+      :active-session-id="activeSessionId"
+      :active-session-title="activeSessionTitle"
+      :default-session-title="defaultSessionTitle"
+      @close="saveModalOpen = false"
+      @save="handleSaveSession"
+    />
 
-        <!-- Content Card -->
-        <div class="relative bg-white border border-slate-100 rounded-3xl max-w-md w-full p-6 shadow-2xl animate-scale-in z-10">
-          <button 
-            @click="saveModalOpen = false" 
-            class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-full transition-colors"
-          >
-            <X class="w-5 h-5" />
-          </button>
-
-          <div class="flex items-center gap-2.5 text-blue-600 mb-4">
-            <Save class="w-5 h-5" />
-            <h3 class="text-lg font-extrabold text-slate-900">Simpan Sesi Komparasi</h3>
-          </div>
-
-          <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-            Berikan nama yang deskriptif untuk sesi perbandingan ini agar mudah ditemukan kembali di kemudian hari.
-          </p>
-
-          <!-- Input field -->
-          <div class="space-y-4">
-            <div>
-              <label for="session-title" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Sesi Komparasi</label>
-              <input
-                id="session-title"
-                v-model="sessionInputTitle"
-                type="text"
-                class="w-full px-4 py-3 bg-slate-50 border border-slate-100 hover:border-slate-200 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 rounded-xl font-medium text-sm transition-all"
-                :placeholder="defaultSessionTitle"
-              />
-              <p class="text-[10px] text-slate-400 font-semibold mt-1.5 italic">
-                *Kosongkan untuk penamaan otomatis berdasarkan isi gadget.
-              </p>
-            </div>
-            
-            <div v-if="activeSessionId" class="flex gap-2 bg-blue-50/30 border border-blue-50 p-3 rounded-xl text-xs text-blue-800 font-medium">
-              <Sparkles class="w-4 h-4 text-blue-600 flex-shrink-0" />
-              <span>Sesi ini terhubung dengan <strong class="font-bold">"{{ activeSessionTitle }}"</strong>. Anda bisa menimpa sesi saat ini atau menyimpannya sebagai sesi baru.</span>
-            </div>
-          </div>
-
-          <!-- Buttons layout -->
-          <div class="mt-6 flex flex-col sm:flex-row items-center gap-2 justify-end">
-            <button
-              @click="saveModalOpen = false"
-              class="w-full sm:w-auto px-4 py-2.5 text-slate-600 hover:text-slate-800 font-bold text-sm transition-colors"
-            >
-              Batal
-            </button>
-            <button
-              v-if="activeSessionId"
-              @click="handleSaveSession(true)"
-              class="w-full sm:w-auto px-5 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-sm rounded-xl transition-all"
-            >
-              Simpan Baru
-            </button>
-            <button
-              @click="handleSaveSession(false)"
-              class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/10 transition-all"
-            >
-              {{ activeSessionId ? 'Timpa Sesi' : 'Simpan Sesi' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </Transition>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-100 pt-16 pb-8 mt-12">
@@ -558,6 +294,11 @@ import {
 } from '../services/compareService'
 import { formatPrice } from '../data/mockData.js'
 
+import CompareMatrixTable from '../components/compare/CompareMatrixTable.vue'
+import SavedSessionsSidebar from '../components/compare/SavedSessionsSidebar.vue'
+import SaveSessionModal from '../components/compare/SaveSessionModal.vue'
+
+
 const router = useRouter()
 const route = useRoute()
 
@@ -582,24 +323,6 @@ const closeDropdown = (e) => {
   }
 }
 
-// Quick scenarios tanding recommendations
-const matchRecommendations = [
-  {
-    title: "iPhone 16 Pro Max vs Samsung Galaxy S25 Ultra",
-    tag: "Flagship Tanding",
-    ids: ["g-1", "g-2"]
-  },
-  {
-    title: "MacBook Pro M4 vs Dell XPS 15",
-    tag: "Laptop Premium",
-    ids: ["g-4", "g-5"]
-  },
-  {
-    title: "iPad Pro M4 vs Galaxy Tab S10 Ultra",
-    tag: "Tablet Terbaik",
-    ids: ["g-7", "g-8"]
-  }
-]
 
 // Comparison workspace state
 const allGadgets = ref([])
@@ -622,7 +345,7 @@ const loadingSessions = ref(false)
 
 // Save session modal states
 const saveModalOpen = ref(false)
-const sessionInputTitle = ref('')
+
 
 // Default placeholder for session title based on compared gadgets
 const defaultSessionTitle = computed(() => {
@@ -727,11 +450,6 @@ const clearAllCompared = () => {
   clearActiveSessionState()
 }
 
-// Scenarios loads
-const loadMatchup = (ids) => {
-  clearActiveSessionState()
-  comparedGadgetIds.value = ids.map(id => String(id).startsWith('g-') ? id : `g-${id}`)
-}
 
 // saved session lists helpers
 const fetchSessions = async () => {
@@ -772,12 +490,11 @@ const clearActiveSessionState = () => {
 
 // Modal and Saving actions
 const openSaveModal = () => {
-  sessionInputTitle.value = activeSessionId.value ? activeSessionTitle.value : ''
   saveModalOpen.value = true
 }
 
-const handleSaveSession = async (forceSaveAsNew = false) => {
-  const title = sessionInputTitle.value.trim() || defaultSessionTitle.value
+const handleSaveSession = async (titleInput, forceSaveAsNew = false) => {
+  const title = titleInput.trim() || defaultSessionTitle.value
   
   try {
     if (activeSessionId.value && !forceSaveAsNew) {
@@ -799,6 +516,7 @@ const handleSaveSession = async (forceSaveAsNew = false) => {
     alert(err.message || 'Gagal menyimpan sesi komparasi.')
   }
 }
+
 
 // Standard helper utilities
 const formatDate = (dateString) => {

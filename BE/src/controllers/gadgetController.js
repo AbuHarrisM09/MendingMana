@@ -2,41 +2,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const { pool } = require('../config/db');
 
-function formatGadgetRow(row) {
-  return {
-    id: `g-${row.id}`,
-    name: row.name,
-    brand: row.brand_name,
-    category: row.category_name,
-    price: Number(row.price),
-    images: row.images
-      ? row.images.map((img) => (img.startsWith('http') || img.startsWith('data:') ? img : `http://localhost:5000${img}`))
-      : [],
-    description: row.description,
-    summary: row.summary,
-    releaseDate: row.release_date,
-    averageRating: Number(row.average_rating),
-    totalReviews: Number(row.total_reviews),
-    isNew: true,
-    isTrending: true,
-  };
-}
-
-function parseGadgetId(value) {
-  if (!value) return null;
-  const cleaned = String(value).startsWith('g-') ? String(value).slice(2) : String(value);
-  const parsed = Number.parseInt(cleaned, 10);
-  return Number.isNaN(parsed) ? null : parsed;
-}
-
-async function getGadgetsColumns(client) {
-  const result = await client.query(
-    `SELECT column_name
-     FROM information_schema.columns
-     WHERE table_schema = 'public' AND table_name = 'gadgets'`,
-  );
-  return new Set(result.rows.map((r) => r.column_name));
-}
+const { formatGadgetRow, parseGadgetId, getGadgetsColumns } = require('../services/dbHelper');
 
 // Get all gadgets
 exports.getGadgets = async (req, res) => {

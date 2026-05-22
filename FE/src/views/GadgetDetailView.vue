@@ -16,6 +16,8 @@
           </router-link>
           <div class="flex items-center gap-3">
             <router-link to="/" class="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">Beranda</router-link>
+            <router-link to="/compare" class="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">Komparasi</router-link>
+            <router-link to="/about" class="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">About</router-link>
           </div>
         </div>
       </div>

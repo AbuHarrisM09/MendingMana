@@ -32,7 +32,8 @@
 
           <!-- Nav links -->
           <div class="flex items-center gap-3">
-            <router-link to="/about" class="hidden lg:flex text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">About</router-link>
+            <router-link to="/compare" class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors px-2 py-1">Komparasi</router-link>
+            <router-link to="/about" class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors px-2 py-1">About</router-link>
 
             <template v-if="isAuthenticated">
               <div class="relative ml-2">
@@ -94,146 +95,21 @@
     </header>
 
     <!-- Modern Hero Section -->
-    <section v-if="heroGadget" class="relative overflow-hidden pt-12 pb-24">
-      <div class="absolute inset-0 z-0">
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
-        <div class="absolute top-40 right-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
-      </div>
+    <HeroSection :hero-gadget="heroGadget" />
 
-      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-16 items-center">
-          <div class="animate-slide-in-left">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 mb-6 border border-orange-100">
-              <TrendingUp class="w-4 h-4" />
-              <span class="text-xs font-bold uppercase tracking-wider">Paling Dicari</span>
-            </div>
-            
-            <h1 class="text-slate-900 font-extrabold tracking-tight mb-4" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1;">
-              Temukan <br/>
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Gadget Impian</span> Anda.
-            </h1>
-            
-            <p class="text-slate-500 text-lg mb-8 max-w-lg leading-relaxed">
-              Bandingkan, temukan ulasan jujur, dan dapatkan harga terbaik untuk <strong class="text-slate-700">{{ heroGadget.name }}</strong> dan ribuan gadget lainnya.
-            </p>
-            
-            <div class="flex flex-col sm:flex-row gap-4">
-              <router-link
-                :to="'/gadget/' + heroGadget.id"
-                class="px-8 py-4 bg-slate-900 text-white rounded-2xl text-base font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20"
-              >
-                Lihat {{ heroGadget.name.split(' ')[0] }} <ChevronRight class="w-5 h-5" />
-              </router-link>
-              <router-link
-                to="/compare"
-                class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl text-base font-bold hover:bg-slate-50 transition-all flex items-center justify-center shadow-sm"
-              >
-                Mulai Komparasi
-              </router-link>
-            </div>
-            
-            <div class="mt-10 flex items-center gap-6">
-              <div class="flex -space-x-3">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=64&h=64" alt="User" class="w-10 h-10 rounded-full border-2 border-white object-cover" />
-                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=64&h=64" alt="User" class="w-10 h-10 rounded-full border-2 border-white object-cover" />
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=64&h=64" alt="User" class="w-10 h-10 rounded-full border-2 border-white object-cover" />
-                <div class="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
-                  +2k
-                </div>
-              </div>
-              <div class="text-sm text-slate-500">
-                Diulas oleh <strong class="text-slate-800">2,000+</strong> tech enthusiast
-              </div>
-            </div>
-          </div>
-
-          <div class="relative lg:h-[600px] flex items-center justify-center animate-scale-in delay-200" style="opacity:0; animation-fill-mode: forwards;">
-            <div class="absolute inset-0 bg-gradient-to-tr from-blue-100 to-purple-50 rounded-[3rem] transform rotate-3 scale-105 -z-10"></div>
-            <img
-              :src="heroGadget.images[0]"
-              :alt="heroGadget.name"
-              class="relative z-10 w-[80%] h-[80%] object-contain drop-shadow-2xl hover:scale-105 hover:-rotate-2 transition-transform duration-500"
-            />
-            
-            <!-- Floating detail cards -->
-            <div class="absolute z-20 bottom-10 -left-10 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl animate-fade-in-up delay-600" style="opacity:0; animation-fill-mode: forwards;">
-              <div class="text-xs text-slate-500 font-medium mb-1">Harga Mulai</div>
-              <div class="text-lg font-extrabold text-slate-900">{{ formatPrice(heroGadget.price) }}</div>
-            </div>
-            
-            <div class="absolute z-20 top-20 -right-4 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl flex items-center gap-3 animate-fade-in-up delay-800" style="opacity:0; animation-fill-mode: forwards;">
-              <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                <Star class="w-5 h-5 text-amber-500 fill-current" />
-              </div>
-              <div>
-                <div class="text-lg font-extrabold text-slate-900 flex items-center gap-1">
-                  {{ heroGadget.averageRating.toFixed(1) }} 
-                </div>
-                <div class="text-xs text-slate-500">Dari {{ heroGadget.totalReviews }} ulasan</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Sticky Filter Section -->
-    <section class="sticky top-[64px] z-30 bg-white/80 backdrop-blur-xl border-y border-slate-100 py-4 shadow-sm transition-all">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <!-- Search (mobile) -->
-          <form @submit.prevent="handleSearch" class="w-full md:hidden">
-            <div class="relative group">
-              <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-              <input
-                v-model="searchQuery"
-                placeholder="Cari gadget apa hari ini?"
-                class="w-full pl-10 pr-10 py-2.5 bg-slate-50/50 border border-transparent hover:border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
-              />
-              <button
-                v-if="searchQuery"
-                type="button"
-                @click="searchQuery = ''"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-slate-200 hover:bg-slate-300 p-1 rounded-full transition-colors"
-              >
-                <X class="w-3 h-3" />
-              </button>
-            </div>
-          </form>
+    <CategoryFilters
+      :categories="categories"
+      :active-category="activeCategory"
+      v-model:search-query="searchQuery"
+      v-model:sort-by="sortBy"
+      :sort-options="sortOptions"
+      :select-style="selectStyle"
+      @category-selected="handleCategoryClick"
+      @search="handleSearch"
+    />
 
-          <!-- Categories -->
-          <div class="flex-1 min-w-0 w-full md:w-auto overflow-x-auto hide-scrollbar">
-            <div class="flex gap-2 min-w-max px-1">
-              <button
-                v-for="cat in categories"
-                :key="cat.value"
-                @click="handleCategoryClick(cat.value)"
-                :class="[
-                  'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all',
-                  activeCategory === cat.value
-                    ? 'bg-slate-900 text-white shadow-md'
-                    : 'bg-white text-slate-500 border border-slate-200 hover:border-blue-300 hover:text-slate-800'
-                ]"
-              >
-                <component :is="cat.icon" class="w-4 h-4" />
-                {{ cat.label }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Sort -->
-          <div class="w-full md:w-auto flex shrink-0">
-            <select
-              v-model="sortBy"
-              class="w-full md:w-auto px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer appearance-none pr-10"
-              :style="selectStyle"
-            >
-              <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Gadget Grid -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -273,27 +149,8 @@
     </section>
 
     <!-- Modern Stats Banner -->
-    <section class="py-24 bg-slate-900 rounded-[3rem] mx-4 sm:mx-6 lg:mx-8 mb-12 overflow-hidden relative">
-      <div class="absolute inset-0 z-0">
-        <div class="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] -translate-y-1/2"></div>
-      </div>
-      <div class="relative z-10 max-w-5xl mx-auto px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4">Mengapa Mending Mana?</h2>
-          <p class="text-slate-400 text-lg">Komunitas tech reviewer terbesar dan paling objektif.</p>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-          <div
-            v-for="stat in statsData"
-            :key="stat.label"
-            class="text-center p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:-translate-y-1 transition-transform duration-300"
-          >
-            <p class="text-slate-300 text-sm font-medium mb-3">{{ stat.label }}</p>
-            <p class="text-white text-3xl md:text-4xl font-black">{{ stat.value }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    <StatsSection :stats-data="statsData" />
+
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-100 pt-16 pb-8">
@@ -332,6 +189,11 @@ import GadgetCard from '../components/gadgets/GadgetCard.vue'
 import StarRating from '../components/gadgets/StarRating.vue'
 import { formatPrice } from '../data/mockData.js'
 import { getGadgets } from '../services/gadgetService.js'
+
+import HeroSection from '../components/home/HeroSection.vue'
+import CategoryFilters from '../components/home/CategoryFilters.vue'
+import StatsSection from '../components/home/StatsSection.vue'
+
 
 const router = useRouter()
 
