@@ -5,6 +5,7 @@ import AdminDashboard from '../views/AdminDashboard.vue'
 import UserDashboard from '../views/UserDashboard.vue'
 import GadgetDetailView from '../views/GadgetDetailView.vue'
 import AboutView from '../views/AboutView.vue'
+import CompareView from '../views/CompareView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,11 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: AboutView
+    },
+    {
+      path: '/compare',
+      name: 'compare',
+      component: CompareView
     },
     {
       path: '/gadget/:id',
