@@ -12,10 +12,10 @@
         <!-- Badges -->
         <div class="absolute top-3 left-3 flex flex-col gap-1.5">
           <span v-if="gadget.isNew" class="px-2.5 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-bold rounded-full flex items-center gap-1 shadow-lg shadow-blue-600/30">
-            <Sparkles class="w-3 h-3" /> Baru
+            <Zap class="w-3 h-3 animate-bounce" /> Baru
           </span>
           <span v-if="gadget.isTrending" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-bold rounded-full flex items-center gap-1 shadow-lg shadow-orange-500/30">
-            <TrendingUp class="w-3 h-3" /> Trending
+            <Flame class="w-3 h-3 animate-pulse" /> Trending
           </span>
         </div>
 
@@ -80,7 +80,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Heart, GitCompare, TrendingUp, Sparkles } from 'lucide-vue-next'
+import { Heart, GitCompare, Flame, Zap } from 'lucide-vue-next'
 import StarRating from './StarRating.vue'
 import { formatPrice } from '../../data/mockData.js'
 

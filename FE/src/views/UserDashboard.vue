@@ -1,22 +1,24 @@
 <template>
-  <div class="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
+  <div class="min-h-screen bg-[#F8F9FA] relative overflow-hidden flex flex-col font-sans text-slate-800">
     <!-- Decorative Background -->
-    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-200/40 rounded-full blur-[120px] -z-10 mix-blend-multiply"></div>
-    <div class="absolute top-40 left-0 w-[500px] h-[500px] bg-indigo-200/40 rounded-full blur-[120px] -z-10 mix-blend-multiply"></div>
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-slate-200/40 rounded-full blur-[120px] -z-10 mix-blend-multiply"></div>
+    <div class="absolute top-40 left-0 w-[500px] h-[500px] bg-slate-200/30 rounded-full blur-[120px] -z-10 mix-blend-multiply"></div>
 
     <!-- Navbar -->
     <header class="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-40 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="h-16 flex items-center justify-between">
           <router-link to="/" class="flex items-center gap-2.5">
-            <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-              <Cpu class="w-5 h-5 text-white" />
-            </div>
+            <img :src="logo" alt="Mending Mana Logo" class="w-9 h-9 object-cover rounded-xl shadow-lg shadow-slate-600/20" />
             <span class="text-slate-900 tracking-tight font-extrabold text-lg hidden sm:block">Mending Mana</span>
           </router-link>
-          <div class="flex items-center gap-3">
-            <router-link to="/" class="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">Beranda</router-link>
-            <button @click="logout" class="text-sm font-medium text-red-500 hover:text-red-700 transition-colors">Keluar</button>
+          <div class="flex items-center gap-2">
+            <router-link to="/" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
+              <Home class="w-4 h-4" /> Beranda
+            </router-link>
+            <button @click="logout" class="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-100 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-100 transition-all shadow-sm">
+              <LogOut class="w-4 h-4" /> Keluar
+            </button>
           </div>
         </div>
       </div>
@@ -24,7 +26,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex-1 flex justify-center items-center py-20">
-      <div class="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div class="w-10 h-10 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
     </div>
     
     <!-- Error -->
@@ -35,7 +37,7 @@
     <!-- Dashboard Content -->
     <main v-else class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full relative z-10">
       <!-- Profile Header -->
-      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2rem] p-8 mb-8 text-white relative overflow-hidden shadow-2xl shadow-blue-900/20 animate-fade-in-up">
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2rem] p-8 mb-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20 animate-fade-in-up">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
         
         <div class="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10 text-center md:text-left">
@@ -43,12 +45,12 @@
             <div class="w-24 h-24 rounded-[1.5rem] bg-white/20 border-4 border-white/30 shadow-xl flex items-center justify-center text-3xl font-black text-white">
               {{ profile?.user?.fullName ? profile.user.fullName.charAt(0).toUpperCase() : 'M' }}
             </div>
-            <div class="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-indigo-700 shadow-md"></div>
+            <div class="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-slate-900 shadow-md"></div>
           </div>
           
           <div class="flex-1">
             <h1 class="text-white font-extrabold text-2xl md:text-3xl tracking-tight mb-1">{{ profile?.user?.fullName || 'Member' }}</h1>
-            <p class="text-blue-100 text-sm md:text-base mb-3 font-medium">{{ profile?.user?.email }}</p>
+            <p class="text-slate-300 text-sm md:text-base mb-3 font-medium">{{ profile?.user?.email }}</p>
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
               <span class="px-3 py-1 bg-white/20 backdrop-blur text-white text-xs font-bold rounded-full shadow-inner border border-white/10">Member</span>
               <span class="px-3 py-1 bg-black/10 backdrop-blur text-white/90 text-xs font-medium rounded-full shadow-inner">
@@ -66,7 +68,7 @@
             :style="{ animationDelay: `${0.2 + i * 0.1}s`, opacity: 0, animationFillMode: 'forwards' }"
           >
             <p class="text-white font-black text-2xl md:text-3xl mb-1">{{ stat.value }}</p>
-            <p class="text-blue-100 text-xs font-bold uppercase tracking-wider">{{ stat.label }}</p>
+            <p class="text-slate-300 text-xs font-bold uppercase tracking-wider">{{ stat.label }}</p>
           </div>
         </div>
       </div>
@@ -80,7 +82,7 @@
           :class="[
             'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all min-w-[120px]',
             activeTab === tab.id
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md scale-[1.02]'
+              ? 'bg-slate-800 text-white shadow-md scale-[1.02]'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
           ]"
         >
@@ -98,7 +100,7 @@
               <div class="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-xl p-6">
                 <div class="flex items-center justify-between mb-6">
                   <h3 class="text-slate-900 font-extrabold text-lg">Ulasan Terbaru</h3>
-                  <button @click="activeTab = 'reviews'" class="text-blue-600 text-sm font-bold flex items-center gap-1 hover:text-blue-700 transition-colors">
+                  <button @click="activeTab = 'reviews'" class="text-slate-600 text-sm font-bold flex items-center gap-1 hover:text-slate-800 transition-colors">
                     Lihat semua <ChevronRight class="w-4 h-4" />
                   </button>
                 </div>
@@ -130,7 +132,7 @@
               <div class="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-xl p-6">
                 <div class="flex items-center justify-between mb-6">
                   <h3 class="text-slate-900 font-extrabold text-lg">Wishlist Saya</h3>
-                  <button @click="activeTab = 'wishlist'" class="text-blue-600 text-sm font-bold flex items-center gap-1 hover:text-blue-700 transition-colors">
+                  <button @click="activeTab = 'wishlist'" class="text-slate-600 text-sm font-bold flex items-center gap-1 hover:text-slate-800 transition-colors">
                     Lihat semua <ChevronRight class="w-4 h-4" />
                   </button>
                 </div>
@@ -146,7 +148,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                       <p class="text-slate-900 text-sm font-bold truncate">{{ item.name }}</p>
-                      <p class="text-blue-600 text-sm font-black mt-0.5">{{ formatPrice(item.price) }}</p>
+                      <p class="text-slate-800 text-sm font-black mt-0.5">{{ formatPrice(item.price) }}</p>
                     </div>
                     <div class="hidden sm:flex items-center text-amber-400">
                       <Star v-for="i in 5" :key="i" class="w-3 h-3" :class="i <= (item.averageRating || 5) ? 'text-amber-400 fill-current' : 'text-slate-200'" />
@@ -160,11 +162,11 @@
             <div class="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-xl p-6">
               <h3 class="text-slate-900 font-extrabold text-lg mb-6">Aksi Cepat</h3>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <router-link to="/" class="flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl transition-all shadow-sm hover:shadow-md hover:scale-[1.03] h-full">
-                  <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                <router-link to="/" class="flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl transition-all shadow-sm hover:shadow-md hover:scale-[1.03] h-full">
+                  <div class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-700">
                     <Package class="w-6 h-6" />
                   </div>
-                  <span class="text-blue-800 text-sm font-bold text-center">Jelajahi Gadget</span>
+                  <span class="text-slate-800 text-sm font-bold text-center">Jelajahi Gadget</span>
                 </router-link>
                 <router-link to="/compare" class="flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-purple-50 to-fuchsia-50 border border-purple-100 rounded-2xl transition-all shadow-sm hover:shadow-md hover:scale-[1.03] h-full">
                   <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
@@ -185,12 +187,12 @@
           <!-- Reviews Tab -->
           <div v-else-if="activeTab === 'reviews'" class="space-y-6">
             <div v-if="reviews.length === 0" class="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-xl p-16 text-center">
-              <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <MessageSquare class="w-10 h-10 text-blue-300" />
+              <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <MessageSquare class="w-10 h-10 text-slate-400" />
               </div>
               <p class="text-slate-800 font-extrabold text-xl mb-2">Belum ada ulasan</p>
               <p class="text-slate-500 font-medium mb-8">Mulai berikan ulasan untuk gadget yang Anda gunakan.</p>
-              <router-link to="/" class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl text-sm shadow-lg hover:shadow-blue-500/30 transition-all inline-block">
+              <router-link to="/" class="px-8 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm shadow-lg hover:shadow-slate-500/30 transition-all inline-block">
                 Jelajahi Gadget
               </router-link>
             </div>
@@ -210,7 +212,7 @@
                     </div>
                   </router-link>
                   <div>
-                    <router-link :to="`/gadget/${rev.gadgetId}`" class="text-slate-900 font-bold text-base hover:text-blue-600 transition-colors">
+                    <router-link :to="`/gadget/${rev.gadgetId}`" class="text-slate-900 font-bold text-base hover:text-slate-600 transition-colors">
                       {{ rev.gadgetName || rev.gadget?.name || 'Gadget' }}
                     </router-link>
                     <div class="flex flex-wrap items-center gap-3 mt-1.5">
@@ -240,7 +242,7 @@
               </div>
               <p class="text-slate-800 font-extrabold text-xl mb-2">Wishlist masih kosong</p>
               <p class="text-slate-500 font-medium mb-8">Simpan gadget favorit Anda untuk dibandingkan atau dilihat kembali nanti.</p>
-              <router-link to="/" class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl text-sm shadow-lg hover:shadow-blue-500/30 transition-all inline-block">
+              <router-link to="/" class="px-8 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm shadow-lg hover:shadow-slate-500/30 transition-all inline-block">
                 Jelajahi Gadget
               </router-link>
             </div>
@@ -259,15 +261,15 @@
                   </div>
                 </router-link>
                 <div class="flex-1 min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-1 rounded-md mb-2">{{ item.category || item.brand }}</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-1 rounded-md mb-2">{{ item.category || item.brand }}</span>
                   <router-link :to="`/gadget/${item.id}`">
-                    <h3 class="text-slate-900 font-bold text-base hover:text-blue-600 transition-colors line-clamp-2">{{ item.name }}</h3>
+                    <h3 class="text-slate-900 font-bold text-base hover:text-slate-600 transition-colors line-clamp-2">{{ item.name }}</h3>
                   </router-link>
                   <div class="flex items-center gap-1.5 mt-2 mb-3">
                     <Star v-for="i in 5" :key="i" class="w-3.5 h-3.5" :class="i <= (item.averageRating || 5) ? 'text-amber-400 fill-current' : 'text-slate-200'" />
                   </div>
                   <div class="mt-auto w-full flex items-center justify-between">
-                    <p class="text-blue-600 font-black text-lg tracking-tight">{{ formatPrice(item.price) }}</p>
+                    <p class="text-slate-800 font-black text-lg tracking-tight">{{ formatPrice(item.price) }}</p>
                     <button class="w-10 h-10 rounded-xl bg-pink-50 text-pink-500 hover:bg-pink-100 flex items-center justify-center transition-colors hover:scale-110" title="Hapus dari wishlist">
                       <Heart class="w-5 h-5 fill-current" />
                     </button>
@@ -291,10 +293,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import logo from '../assets/logo.jpeg'
 import { useRouter } from 'vue-router'
 import {
   Cpu, LayoutDashboard, MessageSquare, Heart, ChevronRight, CheckCircle,
-  Package, Star
+  Package, Star, Home, LogOut
 } from 'lucide-vue-next'
 import { getUserProfile, getUserWishlist, getUserReviews } from '../services/userService'
 

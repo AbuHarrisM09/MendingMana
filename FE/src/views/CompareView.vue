@@ -5,9 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="h-16 flex items-center justify-between">
           <router-link to="/" class="flex items-center gap-2.5">
-            <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-              <Cpu class="w-5 h-5 text-white" />
-            </div>
+            <img :src="logo" alt="Mending Mana Logo" class="w-9 h-9 object-cover rounded-xl shadow-lg shadow-blue-600/20" />
             <span class="text-slate-900 tracking-tight font-extrabold text-lg hidden sm:block">Mending Mana</span>
           </router-link>
 
@@ -255,9 +253,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Cpu class="w-4 h-4 text-white" />
-            </div>
+            <img :src="logo" alt="Mending Mana Logo" class="w-8 h-8 object-cover rounded-xl shadow-md" />
             <span class="font-extrabold text-slate-900">Mending Mana</span>
           </div>
           <div class="flex items-center gap-6 text-sm text-slate-500">
@@ -276,6 +272,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import logo from '../assets/logo.jpeg'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Cpu, Search, X, Plus, Save, Trash2, ArrowRightLeft, Sparkles, Star,

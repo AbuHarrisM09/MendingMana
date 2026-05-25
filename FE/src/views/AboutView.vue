@@ -9,9 +9,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="h-16 flex items-center justify-between">
           <router-link to="/" class="flex items-center gap-2.5">
-            <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-              <Cpu class="w-5 h-5 text-white" />
-            </div>
+            <img :src="logo" alt="Mending Mana Logo" class="w-9 h-9 object-cover rounded-xl shadow-lg shadow-blue-600/20" />
             <span class="text-slate-900 tracking-tight font-extrabold text-lg">Mending Mana</span>
           </router-link>
 
@@ -30,16 +28,12 @@
       
       <!-- Hero / Section Title -->
       <div class="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 mb-6 border border-blue-100">
-          <Sparkles class="w-4 h-4" />
+        <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 mb-6 border border-slate-200">
           <span class="text-xs font-bold uppercase tracking-wider">Meet The Team</span>
         </div>
         <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
-          Tim Pengembang <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Mending Mana</span>
+          Tim Pengembang <span class="text-slate-900">Mending Mana</span>
         </h1>
-        <p class="text-slate-500 text-lg leading-relaxed">
-          Kami adalah kelompok mahasiswa yang berdedikasi untuk menghadirkan platform review & komparasi gadget paling objektif, modern, dan interaktif.
-        </p>
       </div>
 
       <!-- Members Grid -->
@@ -52,7 +46,7 @@
         >
           <!-- Avatar Initial with Gradient -->
           <div class="relative w-24 h-24 mx-auto mb-6">
-            <div :class="['w-full h-full rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg transform group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300 bg-gradient-to-br', member.gradient]">
+            <div :class="['w-full h-full rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg transform group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300', member.bgColor]">
               {{ getInitials(member.name) }}
             </div>
             <!-- Decorative badge -->
@@ -104,7 +98,8 @@
 </template>
 
 <script setup>
-import { Cpu, ArrowLeft, Github, Mail, Linkedin, Code2, Layers, Sparkles } from 'lucide-vue-next';
+import { Cpu, ArrowLeft, Github, Mail, Linkedin, Code2, Layers } from 'lucide-vue-next';
+import logo from '../assets/logo.jpeg';
 
 const teamMembers = [
   {
@@ -113,7 +108,7 @@ const teamMembers = [
     role: "Fullstack Developer",
     roleType: "tech",
     email: "abuharris@mendingmana.id",
-    gradient: "from-blue-600 to-indigo-700 shadow-blue-500/20"
+    bgColor: "bg-slate-800 shadow-slate-500/20"
   },
   {
     name: "Lucky Aditiya",
@@ -121,7 +116,7 @@ const teamMembers = [
     role: "Fullstack Developer",
     roleType: "tech",
     email: "lucky@mendingmana.id",
-    gradient: "from-purple-500 to-pink-600 shadow-purple-500/20"
+    bgColor: "bg-purple-600 shadow-purple-500/20"
   },
   {
     name: "Safa Salsabila",
@@ -129,7 +124,7 @@ const teamMembers = [
     role: "Frontend Developer",
     roleType: "design",
     email: "safa@mendingmana.id",
-    gradient: "from-amber-400 to-orange-500 shadow-amber-500/20"
+    bgColor: "bg-amber-500 shadow-amber-500/20"
   },
   {
     name: "Luthfiena Nur Kamila",
@@ -137,7 +132,7 @@ const teamMembers = [
     role: "Frontend Developer",
     roleType: "design",
     email: "luthfiena@mendingmana.id",
-    gradient: "from-emerald-400 to-teal-600 shadow-emerald-500/20"
+    bgColor: "bg-emerald-600 shadow-emerald-500/20"
   }
 ];
 

@@ -4,9 +4,7 @@
     <aside class="w-64 bg-white border-r border-slate-100 flex flex-col hidden md:flex z-10 transition-all duration-300">
       <div class="h-16 flex items-center px-6 border-b border-slate-50 shrink-0">
         <router-link to="/" class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
-            <Cpu class="w-4 h-4 text-white" />
-          </div>
+          <img :src="logo" alt="Mending Mana Logo" class="w-8 h-8 object-cover rounded-xl shadow-lg shadow-blue-600/20" />
           <h1 class="text-lg font-extrabold text-slate-800 tracking-tight">Mending Mana</h1>
         </router-link>
       </div>
@@ -146,6 +144,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import logo from "../assets/logo.jpeg";
 import { useRouter } from "vue-router";
 import {
   Cpu, Globe, LogOut, Menu, Search, Bell,

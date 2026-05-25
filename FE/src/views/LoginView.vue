@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, ref } from "vue";
+import logo from "../assets/logo.jpeg";
 import { useRouter } from "vue-router";
 import { login, register } from "../services/authService";
 import { Cpu, Eye, EyeOff, LogIn, AlertCircle, ArrowLeft, UserPlus } from 'lucide-vue-next';
@@ -144,9 +145,7 @@ async function handleSubmit() {
       <!-- Logo -->
       <div class="text-center mb-8">
         <router-link to="/" class="inline-flex items-center gap-2.5">
-          <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-            <Cpu class="w-7 h-7 text-white" />
-          </div>
+          <img :src="logo" alt="Mending Mana Logo" class="w-12 h-12 object-cover rounded-2xl shadow-lg shadow-blue-600/30" />
           <span class="text-white font-extrabold text-2xl tracking-tight">Mending Mana</span>
         </router-link>
         <p class="text-slate-400 text-sm mt-3">Platform Review & Rating Gadget</p>

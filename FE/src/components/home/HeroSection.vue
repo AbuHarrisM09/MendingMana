@@ -9,13 +9,13 @@
       <div class="grid lg:grid-cols-2 gap-16 items-center">
         <div class="animate-slide-in-left">
           <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 mb-6 border border-orange-100">
-            <TrendingUp class="w-4 h-4" />
+            <Flame class="w-4 h-4 text-orange-500 animate-pulse" />
             <span class="text-xs font-bold uppercase tracking-wider">Paling Dicari</span>
           </div>
           
           <h1 class="text-slate-900 font-extrabold tracking-tight mb-4" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1;">
             Temukan <br/>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Gadget Impian</span> Anda.
+            <span class="text-amber-600">Gadget Impian</span> Anda.
           </h1>
           
           <p class="text-slate-500 text-lg mb-8 max-w-lg leading-relaxed">
@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import { TrendingUp, ChevronRight, Star } from 'lucide-vue-next'
+import { Flame, ChevronRight, Star } from 'lucide-vue-next'
 import { formatPrice } from '../../data/mockData.js'
 
 defineProps({

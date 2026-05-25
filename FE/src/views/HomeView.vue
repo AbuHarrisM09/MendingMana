@@ -5,9 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="h-16 flex items-center justify-between">
           <router-link to="/" class="flex items-center gap-2.5">
-            <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-              <Cpu class="w-5 h-5 text-white" />
-            </div>
+            <img :src="logo" alt="Mending Mana Logo" class="w-9 h-9 object-cover rounded-xl shadow-lg shadow-blue-600/20" />
             <span class="text-slate-900 tracking-tight font-extrabold text-lg hidden sm:block">Mending Mana</span>
           </router-link>
 
@@ -148,8 +146,7 @@
       </div>
     </section>
 
-    <!-- Modern Stats Banner -->
-    <StatsSection :stats-data="statsData" />
+
 
 
     <!-- Footer -->
@@ -157,9 +154,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Cpu class="w-4 h-4 text-white" />
-            </div>
+            <img :src="logo" alt="Mending Mana Logo" class="w-8 h-8 object-cover rounded-xl shadow-md" />
             <span class="font-extrabold text-slate-900">Mending Mana</span>
           </div>
           <div class="flex items-center gap-6 text-sm text-slate-500">
@@ -178,6 +173,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import logo from '../assets/logo.jpeg'
 import { useRouter } from 'vue-router'
 import {
   Cpu, Search, SlidersHorizontal, TrendingUp, ChevronRight,
@@ -192,7 +188,6 @@ import { getGadgets } from '../services/gadgetService.js'
 
 import HeroSection from '../components/home/HeroSection.vue'
 import CategoryFilters from '../components/home/CategoryFilters.vue'
-import StatsSection from '../components/home/StatsSection.vue'
 
 
 const router = useRouter()
@@ -303,12 +298,7 @@ const filteredGadgets = computed(() => {
     })
 })
 
-const statsData = computed(() => [
-  { label: 'Produk Terdaftar', value: `${gadgets.value.length}+` },
-  { label: 'Total Ulasan', value: '1,200+' },
-  { label: 'Pengguna Aktif', value: '5,000+' },
-  { label: 'Brand Tersedia', value: '15+' },
-])
+
 
 const handleCategoryClick = (catValue) => {
   activeCategory.value = catValue
