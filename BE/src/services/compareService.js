@@ -1,48 +1,30 @@
-const { pool } = require('../config/db');
 const { formatGadgetRow } = require('./dbHelper');
+const compareModel = require('../models/compareModel');
 
-// Helper to construct side-by-side specs matrix
+/**
+ * Construct side-by-side specs matrix from an array of gadget IDs.
+ * Uses compareModel for all data fetching.
+ */
 async function getComparisonData(gadgetIds) {
   if (!gadgetIds || gadgetIds.length === 0) {
     return { gadgets: [], specGroups: [] };
   }
 
   // 1. Fetch detailed gadgets
-  const gadgetsQuery = `
-    SELECT 
-      g.*,
-      b.name as brand_name,
-      c.name as category_name,
-      (
-        SELECT json_agg(file_url)
-        FROM gadget_media gm
-        WHERE gm.gadget_id = g.id
-      ) as images
-    FROM gadgets g
-    LEFT JOIN brands b ON g.brand_id = b.id
-    LEFT JOIN categories c ON g.category_id = c.id
-    WHERE g.id = ANY($1::bigint[])
-  `;
-  const gadgetsRes = await pool.query(gadgetsQuery, [gadgetIds]);
-  const gadgets = gadgetsRes.rows.map(formatGadgetRow);
+  const gadgetsRows = await compareModel.findGadgetsByIds(gadgetIds);
+  const gadgets = gadgetsRows.map(formatGadgetRow);
 
   if (gadgets.length === 0) {
     return { gadgets: [], specGroups: [] };
   }
 
   // 2. Fetch all specs for these gadgets
-  const specsQuery = `
-    SELECT gadget_id, spec_group, spec_key, spec_value
-    FROM gadget_specs
-    WHERE gadget_id = ANY($1::bigint[])
-    ORDER BY display_order ASC, spec_key ASC
-  `;
-  const specsRes = await pool.query(specsQuery, [gadgetIds]);
+  const specsRows = await compareModel.findSpecsByGadgetIds(gadgetIds);
 
   // 3. Build unified specifications matrix
   const specGroupsMap = {};
 
-  for (const spec of specsRes.rows) {
+  for (const spec of specsRows) {
     const gId = `g-${spec.gadget_id}`;
     const groupName = spec.spec_group || 'Umum';
     const keyName = spec.spec_key;
@@ -62,19 +44,12 @@ async function getComparisonData(gadgetIds) {
     const keysMap = specGroupsMap[groupName];
     const specs = Object.keys(keysMap).map(keyName => {
       const values = {};
-      // Ensure every compared gadget has a value entry (default null)
       for (const g of gadgets) {
         values[g.id] = keysMap[keyName][g.id] || null;
       }
-      return {
-        key: keyName,
-        values: values
-      };
+      return { key: keyName, values };
     });
-    return {
-      group: groupName,
-      specs: specs
-    };
+    return { group: groupName, specs };
   });
 
   return { gadgets, specGroups };

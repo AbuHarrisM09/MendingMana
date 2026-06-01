@@ -1,7 +1,7 @@
 const { pool } = require('../config/db');
-
-const { parseGadgetId, formatGadgetRow } = require('../services/dbHelper');
+const { parseGadgetId } = require('../services/dbHelper');
 const { getComparisonData } = require('../services/compareService');
+const compareModel = require('../models/compareModel');
 
 // 1. Instant / On-the-fly Comparison (Public)
 exports.compareInstant = async (req, res) => {
@@ -17,7 +17,6 @@ exports.compareInstant = async (req, res) => {
     }
 
     const gadgetIds = idsInput.map(parseGadgetId).filter(id => id !== null);
-
     if (gadgetIds.length === 0) {
       return res.status(400).json({ message: 'Daftar gadgetIds tidak valid atau kosong.' });
     }
@@ -30,36 +29,11 @@ exports.compareInstant = async (req, res) => {
   }
 };
 
-// 2. Get All Comparison Sessions for Current User (Member Only)
+// 2. Get All Comparison Sessions for Current User
 exports.getSessions = async (req, res) => {
   try {
     const userId = req.user.id;
-
-    const query = `
-      SELECT 
-        cs.*,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', 'g-' || g.id,
-              'name', g.name,
-              'brand', b.name,
-              'price', g.price,
-              'image', (SELECT file_url FROM gadget_media WHERE gadget_id = g.id LIMIT 1)
-            )
-          ) FILTER (WHERE g.id IS NOT NULL),
-          '[]'
-        ) as gadgets
-      FROM comparison_sessions cs
-      LEFT JOIN comparison_items ci ON ci.session_id = cs.id
-      LEFT JOIN gadgets g ON ci.gadget_id = g.id
-      LEFT JOIN brands b ON g.brand_id = b.id
-      WHERE cs.user_id = $1
-      GROUP BY cs.id
-      ORDER BY cs.updated_at DESC
-    `;
-
-    const { rows } = await pool.query(query, [userId]);
+    const rows = await compareModel.findSessionsByUser(userId);
 
     const sessions = rows.map(row => ({
       id: row.id,
@@ -68,8 +42,10 @@ exports.getSessions = async (req, res) => {
       updatedAt: row.updated_at,
       gadgets: row.gadgets.map(g => ({
         ...g,
-        image: g.image ? (g.image.startsWith('http') || g.image.startsWith('data:') ? g.image : `http://localhost:5000${g.image}`) : null
-      }))
+        image: g.image
+          ? (g.image.startsWith('http') || g.image.startsWith('data:') ? g.image : `http://localhost:5000${g.image}`)
+          : null,
+      })),
     }));
 
     res.status(200).json(sessions);
@@ -79,7 +55,7 @@ exports.getSessions = async (req, res) => {
   }
 };
 
-// 3. Create New Comparison Session (Member Only)
+// 3. Create New Comparison Session
 exports.createSession = async (req, res) => {
   const client = await pool.connect();
   try {
@@ -96,38 +72,21 @@ exports.createSession = async (req, res) => {
 
     await client.query('BEGIN');
 
-    // Auto-generate title if none provided
+    // Auto-generate title
     if (!title || title.trim() === '') {
       if (parsedGadgetIds.length > 0) {
-        const namesRes = await client.query(
-          `SELECT name FROM gadgets WHERE id = ANY($1::bigint[]) LIMIT 3`,
-          [parsedGadgetIds]
-        );
-        const names = namesRes.rows.map(r => r.name);
+        const names = await compareModel.findGadgetNamesByIds(client, parsedGadgetIds);
         title = `Komparasi: ${names.join(' vs ')}`;
-        if (namesRes.rows.length < parsedGadgetIds.length) {
-          title += ' ...';
-        }
+        if (names.length < parsedGadgetIds.length) title += ' ...';
       } else {
         title = 'Komparasi Baru';
       }
     }
 
-    // Insert session
-    const sessionRes = await client.query(
-      `INSERT INTO comparison_sessions (user_id, title) VALUES ($1, $2) RETURNING *`,
-      [userId, title]
-    );
-    const session = sessionRes.rows[0];
+    const session = await compareModel.insertSession(client, userId, title);
 
-    // Insert items
-    if (parsedGadgetIds.length > 0) {
-      for (const gadgetId of parsedGadgetIds) {
-        await client.query(
-          `INSERT INTO comparison_items (session_id, gadget_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-          [session.id, gadgetId]
-        );
-      }
+    for (const gadgetId of parsedGadgetIds) {
+      await compareModel.insertSessionItem(client, session.id, gadgetId);
     }
 
     await client.query('COMMIT');
@@ -141,32 +100,18 @@ exports.createSession = async (req, res) => {
   }
 };
 
-// 4. Get Detailed Session By ID (Member Only)
+// 4. Get Detailed Session By ID
 exports.getSessionById = async (req, res) => {
   try {
     const userId = req.user.id;
     const sessionId = req.params.id;
 
-    // Check ownership
-    const sessionRes = await pool.query(
-      `SELECT * FROM comparison_sessions WHERE id = $1 AND user_id = $2 LIMIT 1`,
-      [sessionId, userId]
-    );
-
-    if (sessionRes.rows.length === 0) {
+    const session = await compareModel.findSessionByIdAndUser(sessionId, userId);
+    if (!session) {
       return res.status(404).json({ message: 'Sesi komparasi tidak ditemukan.' });
     }
 
-    const session = sessionRes.rows[0];
-
-    // Fetch gadget IDs in this session
-    const itemsRes = await pool.query(
-      `SELECT gadget_id FROM comparison_items WHERE session_id = $1`,
-      [sessionId]
-    );
-    const gadgetIds = itemsRes.rows.map(r => r.gadget_id);
-
-    // Get unified matrix data
+    const gadgetIds = await compareModel.findItemsBySessionId(sessionId);
     const comparisonData = await getComparisonData(gadgetIds);
 
     res.status(200).json({
@@ -174,7 +119,7 @@ exports.getSessionById = async (req, res) => {
       title: session.title,
       createdAt: session.created_at,
       updatedAt: session.updated_at,
-      ...comparisonData
+      ...comparisonData,
     });
   } catch (err) {
     console.error('Error in getSessionById:', err);
@@ -182,7 +127,7 @@ exports.getSessionById = async (req, res) => {
   }
 };
 
-// 5. Update Session (Member Only)
+// 5. Update Session
 exports.updateSession = async (req, res) => {
   const client = await pool.connect();
   try {
@@ -190,50 +135,26 @@ exports.updateSession = async (req, res) => {
     const sessionId = req.params.id;
     let { title, gadgetIds } = req.body;
 
-    // Check ownership
-    const checkRes = await client.query(
-      `SELECT * FROM comparison_sessions WHERE id = $1 AND user_id = $2 LIMIT 1`,
-      [sessionId, userId]
-    );
-
-    if (checkRes.rows.length === 0) {
+    const session = await compareModel.findSessionByIdAndUser(sessionId, userId);
+    if (!session) {
       return res.status(404).json({ message: 'Sesi komparasi tidak ditemukan.' });
     }
 
     await client.query('BEGIN');
 
-    // Update title if provided
-    if (title !== undefined) {
-      await client.query(
-        `UPDATE comparison_sessions SET title = $1, updated_at = NOW() WHERE id = $2`,
-        [title, sessionId]
-      );
-    } else {
-      await client.query(
-        `UPDATE comparison_sessions SET updated_at = NOW() WHERE id = $1`,
-        [sessionId]
-      );
-    }
+    await compareModel.updateSessionTitle(client, sessionId, title);
 
-    // Sync gadget items if provided
     if (gadgetIds !== undefined) {
       if (typeof gadgetIds === 'string') {
         gadgetIds = gadgetIds.split(',').map(s => s.trim());
       }
-      
       const parsedGadgetIds = Array.isArray(gadgetIds)
         ? gadgetIds.map(parseGadgetId).filter(id => id !== null)
         : [];
 
-      // Remove old items
-      await client.query(`DELETE FROM comparison_items WHERE session_id = $1`, [sessionId]);
-
-      // Add new items
+      await compareModel.deleteItemsBySessionId(client, sessionId);
       for (const gadgetId of parsedGadgetIds) {
-        await client.query(
-          `INSERT INTO comparison_items (session_id, gadget_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-          [sessionId, gadgetId]
-        );
+        await compareModel.insertSessionItem(client, sessionId, gadgetId);
       }
     }
 
@@ -248,18 +169,14 @@ exports.updateSession = async (req, res) => {
   }
 };
 
-// 6. Delete Session (Member Only)
+// 6. Delete Session
 exports.deleteSession = async (req, res) => {
   try {
     const userId = req.user.id;
     const sessionId = req.params.id;
 
-    const result = await pool.query(
-      `DELETE FROM comparison_sessions WHERE id = $1 AND user_id = $2`,
-      [sessionId, userId]
-    );
-
-    if (result.rowCount === 0) {
+    const rowCount = await compareModel.deleteSession(sessionId, userId);
+    if (rowCount === 0) {
       return res.status(404).json({ message: 'Sesi komparasi tidak ditemukan.' });
     }
 
@@ -270,7 +187,7 @@ exports.deleteSession = async (req, res) => {
   }
 };
 
-// 7. Add Single Item to Session (Member Only)
+// 7. Add Single Item to Session
 exports.addSessionItem = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -282,27 +199,13 @@ exports.addSessionItem = async (req, res) => {
       return res.status(400).json({ message: 'ID gadget tidak valid.' });
     }
 
-    // Check ownership
-    const checkRes = await pool.query(
-      `SELECT * FROM comparison_sessions WHERE id = $1 AND user_id = $2 LIMIT 1`,
-      [sessionId, userId]
-    );
-
-    if (checkRes.rows.length === 0) {
+    const session = await compareModel.findSessionByIdAndUser(sessionId, userId);
+    if (!session) {
       return res.status(404).json({ message: 'Sesi komparasi tidak ditemukan.' });
     }
 
-    // Insert item
-    await pool.query(
-      `INSERT INTO comparison_items (session_id, gadget_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-      [sessionId, parsedGadgetId]
-    );
-
-    // Touch updated_at
-    await pool.query(
-      `UPDATE comparison_sessions SET updated_at = NOW() WHERE id = $1`,
-      [sessionId]
-    );
+    await compareModel.insertSessionItem(pool, sessionId, parsedGadgetId);
+    await compareModel.touchSession(sessionId);
 
     res.status(200).json({ message: 'Gadget berhasil ditambahkan ke komparasi.' });
   } catch (err) {
@@ -311,7 +214,7 @@ exports.addSessionItem = async (req, res) => {
   }
 };
 
-// 8. Remove Single Item from Session (Member Only)
+// 8. Remove Single Item from Session
 exports.removeSessionItem = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -323,32 +226,17 @@ exports.removeSessionItem = async (req, res) => {
       return res.status(400).json({ message: 'ID gadget tidak valid.' });
     }
 
-    // Check ownership
-    const checkRes = await pool.query(
-      `SELECT * FROM comparison_sessions WHERE id = $1 AND user_id = $2 LIMIT 1`,
-      [sessionId, userId]
-    );
-
-    if (checkRes.rows.length === 0) {
+    const session = await compareModel.findSessionByIdAndUser(sessionId, userId);
+    if (!session) {
       return res.status(404).json({ message: 'Sesi komparasi tidak ditemukan.' });
     }
 
-    // Delete item
-    const result = await pool.query(
-      `DELETE FROM comparison_items WHERE session_id = $1 AND gadget_id = $2`,
-      [sessionId, parsedGadgetId]
-    );
-
-    if (result.rowCount === 0) {
+    const rowCount = await compareModel.deleteSessionItem(sessionId, parsedGadgetId);
+    if (rowCount === 0) {
       return res.status(404).json({ message: 'Gadget tidak ditemukan di dalam sesi komparasi ini.' });
     }
 
-    // Touch updated_at
-    await pool.query(
-      `UPDATE comparison_sessions SET updated_at = NOW() WHERE id = $1`,
-      [sessionId]
-    );
-
+    await compareModel.touchSession(sessionId);
     res.status(200).json({ message: 'Gadget berhasil dihapus dari komparasi.' });
   } catch (err) {
     console.error('Error in removeSessionItem:', err);
