@@ -22,6 +22,8 @@ const env = {
     ssl: process.env.DB_SSL === 'true',
     connectionString: process.env.DATABASE_URL || null,
   },
+  supabaseUrl: process.env.SUPABASE_URL,
+  supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
 };
 
 module.exports = env;
