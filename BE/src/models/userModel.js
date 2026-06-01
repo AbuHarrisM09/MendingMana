@@ -10,6 +10,7 @@ async function findUserByEmail(email) {
       u.is_banned,
       u.banned_until,
       u.banned_reason,
+      u.profile_image_url,
       r.name AS role_name
     FROM users u
     JOIN roles r ON r.id = u.role_id
@@ -33,14 +34,14 @@ async function findRoleByName(roleName) {
   return rows[0] || null;
 }
 
-async function createUser({ fullName, email, passwordHash, roleId, username = null }) {
+async function createUser({ fullName, email, passwordHash, roleId, username = null, profileImageUrl = null }) {
   const sql = `
-    INSERT INTO users (full_name, username, email, password_hash, role_id, is_verified)
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING id, full_name, email, role_id
+    INSERT INTO users (full_name, username, email, password_hash, role_id, is_verified, profile_image_url)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING id, full_name, email, role_id, profile_image_url
   `;
 
-  const { rows } = await query(sql, [fullName, username, email, passwordHash, roleId, true]);
+  const { rows } = await query(sql, [fullName, username, email, passwordHash, roleId, true, profileImageUrl]);
   return rows[0];
 }
 

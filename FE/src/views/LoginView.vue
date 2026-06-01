@@ -1,6 +1,7 @@
 <script setup>
 import { Cpu, Eye, EyeOff, LogIn, AlertCircle, ArrowLeft, UserPlus } from 'lucide-vue-next';
 import { useLoginView } from '../composables/useLoginView';
+import { supabase } from '../config/supabase';
 
 const {
   logo,
@@ -15,6 +16,20 @@ const {
   setMode,
   handleSubmit,
 } = useLoginView();
+
+const loginWithGoogle = async () => {
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/auth/callback',
+      },
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to trigger Google OAuth:', err.message);
+  }
+};
 </script>
 
 <template>
@@ -89,6 +104,28 @@ const {
                   <div v-if="isSubmitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <LogIn v-else class="w-4 h-4" />
                   {{ isSubmitting ? 'Memproses...' : 'Masuk' }}
+                </button>
+
+                <!-- Divider -->
+                <div class="relative flex py-1.5 items-center">
+                  <div class="flex-grow border-t border-slate-200"></div>
+                  <span class="flex-shrink mx-4 text-slate-400 text-xs font-semibold uppercase tracking-wider">Atau</span>
+                  <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <!-- Google Login Button -->
+                <button
+                  type="button"
+                  @click="loginWithGoogle"
+                  class="w-full py-3 border border-slate-200 hover:border-slate-300 rounded-xl text-sm hover:bg-slate-50 cursor-pointer transition-all flex items-center justify-center gap-3 font-bold text-slate-700 shadow-sm"
+                >
+                  <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#EA4335"
+                      d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.99 5.99 0 0 1 8 12.5a5.99 5.99 0 0 1 5.99-6.015c1.472 0 2.802.535 3.843 1.42l3.14-3.14a10.237 10.237 0 0 0-6.983-2.765C8.36 2 3.5 6.86 3.5 12.5S8.36 23 13.99 23c5.78 0 9.51-4.06 9.51-9.7a9.23 9.23 0 0 0-.17-1.742H12.24Z"
+                    />
+                  </svg>
+                  Masuk dengan Google
                 </button>
               </form>
 
@@ -173,6 +210,28 @@ const {
                   <div v-if="isSubmitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <UserPlus v-else class="w-4 h-4" />
                   {{ isSubmitting ? 'Memproses...' : 'Daftar Sekarang' }}
+                </button>
+
+                <!-- Divider -->
+                <div class="relative flex py-1.5 items-center">
+                  <div class="flex-grow border-t border-slate-200"></div>
+                  <span class="flex-shrink mx-4 text-slate-400 text-xs font-semibold uppercase tracking-wider">Atau</span>
+                  <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <!-- Google Register Button -->
+                <button
+                  type="button"
+                  @click="loginWithGoogle"
+                  class="w-full py-3 border border-slate-200 hover:border-slate-300 rounded-xl text-sm hover:bg-slate-50 cursor-pointer transition-all flex items-center justify-center gap-3 font-bold text-slate-700 shadow-sm"
+                >
+                  <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#EA4335"
+                      d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.99 5.99 0 0 1 8 12.5a5.99 5.99 0 0 1 5.99-6.015c1.472 0 2.802.535 3.843 1.42l3.14-3.14a10.237 10.237 0 0 0-6.983-2.765C8.36 2 3.5 6.86 3.5 12.5S8.36 23 13.99 23c5.78 0 9.51-4.06 9.51-9.7a9.23 9.23 0 0 0-.17-1.742H12.24Z"
+                    />
+                  </svg>
+                  Daftar dengan Google
                 </button>
               </form>
 

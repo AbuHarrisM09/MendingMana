@@ -147,8 +147,82 @@ function validateRegisterPayload({ fullName, email, password }) {
   return null;
 }
 
+async function loginOrRegisterGoogleUser({ email, fullName, profileImageUrl = null }) {
+  // 1. Cek apakah user sudah ada
+  let user = await findUserByEmail(email);
+
+  if (!user) {
+    // 2. Jika belum ada, buat user baru
+    const memberRole = await findRoleByName(REGISTER_ALLOWED_ROLE);
+    if (!memberRole) {
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Role member belum tersedia di database.',
+      };
+    }
+
+    // Buat password acak yang aman dan hash
+    const dummyPassword = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const passwordHash = await bcrypt.hash(dummyPassword, 10);
+
+    // Buat username acak/default dari email
+    const username = email.split('@')[0].slice(0, 30) + Math.floor(Math.random() * 1000);
+
+    await createUser({
+      fullName,
+      email,
+      passwordHash,
+      roleId: memberRole.id,
+      username,
+      profileImageUrl,
+    });
+
+    // Ambil info lengkap user yang baru dibuat
+    user = await findUserByEmail(email);
+  }
+
+  // 3. Cek status blokir/ban
+  if (user.is_banned || isUserTemporarilyBanned(user.banned_until)) {
+    return {
+      success: false,
+      statusCode: 403,
+      message: user.banned_reason || 'Akun Anda sedang diblokir.',
+    };
+  }
+
+  // 4. Generate JWT kustom
+  const tokenPayload = {
+    sub: user.id,
+    email: user.email,
+    role: user.role_name,
+  };
+
+  const token = jwt.sign(tokenPayload, env.jwtSecret, {
+    expiresIn: env.jwtExpiresIn,
+  });
+
+  return {
+    success: true,
+    statusCode: 200,
+    message: 'Login Google berhasil.',
+    data: {
+      token,
+      tokenType: 'Bearer',
+      expiresIn: env.jwtExpiresIn,
+      user: {
+        id: user.id,
+        fullName: user.full_name,
+        email: user.email,
+        role: user.role_name,
+      },
+    },
+  };
+}
+
 module.exports = {
   loginUser,
   registerUser,
   validateRegisterPayload,
+  loginOrRegisterGoogleUser,
 };

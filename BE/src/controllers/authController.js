@@ -1,4 +1,4 @@
-const { loginUser, registerUser, validateRegisterPayload } = require('../services/authService');
+const { loginUser, registerUser, validateRegisterPayload, loginOrRegisterGoogleUser } = require('../services/authService');
 
 async function login(req, res) {
   const { email, password } = req.body;
@@ -63,7 +63,41 @@ async function register(req, res) {
   }
 }
 
+async function googleLogin(req, res) {
+  const { email, fullName, profileImageUrl } = req.body;
+
+  if (!email || !fullName) {
+    return res.status(400).json({
+      message: 'Email dan nama lengkap wajib disertakan.',
+    });
+  }
+
+  try {
+    const result = await loginOrRegisterGoogleUser({
+      email: String(email).trim().toLowerCase(),
+      fullName: String(fullName).trim(),
+      profileImageUrl: profileImageUrl ? String(profileImageUrl).trim() : null,
+    });
+
+    if (!result.success) {
+      return res.status(result.statusCode).json({
+        message: result.message,
+      });
+    }
+
+    return res.status(result.statusCode).json({
+      message: result.message,
+      ...result.data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Terjadi kesalahan pada server.',
+    });
+  }
+}
+
 module.exports = {
   login,
   register,
+  googleLogin,
 };
