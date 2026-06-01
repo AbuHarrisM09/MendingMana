@@ -271,284 +271,53 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import logo from '../assets/logo.jpeg'
-import { useRouter, useRoute } from 'vue-router'
 import {
-  Cpu, Search, X, Plus, Save, Trash2, ArrowRightLeft, Sparkles, Star,
-  LogOut, Shield, LayoutDashboard, Heart, ChevronDown, RefreshCw, AlertTriangle,
-  FolderHeart, History, Check
+  Search, X, Save, Trash2, ArrowRightLeft, Sparkles,
+  LogOut, Shield, LayoutDashboard, ChevronDown, RefreshCw, AlertTriangle
 } from 'lucide-vue-next'
-
-import { getGadgets } from '../services/gadgetService'
-import {
-  compareGadgets,
-  getCompareSessions,
-  getCompareSessionById,
-  createCompareSession,
-  updateCompareSession,
-  deleteCompareSession
-} from '../services/compareService'
-import { formatPrice } from '../data/mockData.js'
-
 import CompareMatrixTable from '../components/compare/CompareMatrixTable.vue'
 import SavedSessionsSidebar from '../components/compare/SavedSessionsSidebar.vue'
 import SaveSessionModal from '../components/compare/SaveSessionModal.vue'
+import { useCompareView } from '../composables/useCompareView'
 
-
-const router = useRouter()
-const route = useRoute()
-
-// Authenticated user parameters
-const token = ref(localStorage.getItem('token') || '')
-const role = ref(localStorage.getItem('role') || '')
-const userName = ref(localStorage.getItem('userFullName') || '')
-const userEmail = ref(localStorage.getItem('userEmail') || 'user@email.com')
-const userAvatar = ref(localStorage.getItem('userAvatar') || '')
-const isAuthenticated = computed(() => Boolean(token.value))
-const isMember = computed(() => isAuthenticated.value && role.value === 'member')
-
-const profileOpen = ref(false)
-
-// Closing standard navigation dropdown
-const closeDropdown = (e) => {
-  if (profileOpen.value && !e.target.closest('.relative.ml-2')) {
-    profileOpen.value = false
-  }
-  if (searchFocused.value && !e.target.closest('.relative.max-w-2xl')) {
-    searchFocused.value = false
-  }
-}
-
-
-// Comparison workspace state
-const allGadgets = ref([])
-const comparedGadgetIds = ref([])
-const comparedGadgetsData = ref(null)
-const loadingCompare = ref(false)
-
-// Active Session tracking
-const activeSessionId = ref(null)
-const activeSessionTitle = ref('')
-
-// Search states
-const searchQuery = ref('')
-const searchFocused = ref(false)
-const searchInputRef = ref(null)
-
-// Member sessions states
-const sessionsList = ref([])
-const loadingSessions = ref(false)
-
-// Save session modal states
-const saveModalOpen = ref(false)
-
-
-// Default placeholder for session title based on compared gadgets
-const defaultSessionTitle = computed(() => {
-  if (!comparedGadgetsData.value || !comparedGadgetsData.value.gadgets) return 'Komparasi Baru'
-  const names = comparedGadgetsData.value.gadgets.map(g => g.name)
-  return `Komparasi: ${names.join(' vs ')}`
-})
-
-// Search matches computed
-const searchResults = computed(() => {
-  if (!searchQuery.value.trim()) return []
-  const q = searchQuery.value.toLowerCase()
-  return allGadgets.value.filter(g => 
-    g.name.toLowerCase().includes(q) ||
-    g.brand.toLowerCase().includes(q) ||
-    g.category.toLowerCase().includes(q)
-  ).filter(g => {
-    // Normalize IDs to make sure comparison matches e.g. "g-1" vs "g-1" or "1"
-    const isAdded = comparedGadgetIds.value.some(addedId => {
-      const addedNum = String(addedId).replace('g-', '')
-      const gNum = String(g.id).replace('g-', '')
-      return addedNum === gNum
-    })
-    return !isAdded
-  })
-})
-
-onMounted(async () => {
-  document.addEventListener('click', closeDropdown)
-  
-  // 1. Fetch all gadgets for fast memory searching
-  try {
-    const list = await getGadgets()
-    // Normalize ids inside allGadgets to match the standard comparison ids "g-id"
-    allGadgets.value = list.map(item => ({
-      ...item,
-      id: String(item.id).startsWith('g-') ? item.id : `g-${item.id}`
-    }))
-  } catch (err) {
-    console.error('Failed to load gadgets list:', err)
-  }
-
-  // 2. Fetch user saved sessions list if logged in
-  if (isMember.value) {
-    fetchSessions()
-  }
-
-  // 3. Look for query parameter list: /compare?ids=g-1,g-2
-  const idsQuery = route.query.ids || route.query.gadgetIds
-  if (idsQuery) {
-    const list = String(idsQuery).split(',').map(s => s.trim()).filter(Boolean)
-    comparedGadgetIds.value = list.map(item => String(item).startsWith('g-') ? item : `g-${item}`)
-  }
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeDropdown)
-})
-
-// Main trigger calculation algorithm watcher
-watch(comparedGadgetIds, () => {
-  triggerComparison()
-}, { deep: true })
-
-const triggerComparison = async () => {
-  if (comparedGadgetIds.value.length === 0) {
-    comparedGadgetsData.value = null
-    return
-  }
-  loadingCompare.value = true
-  try {
-    const rawIds = comparedGadgetIds.value.map(id => String(id).replace('g-', ''))
-    const data = await compareGadgets(rawIds)
-    comparedGadgetsData.value = data
-  } catch (err) {
-    console.error('Error fetching comparison matrix:', err)
-  } finally {
-    loadingCompare.value = false
-  }
-}
-
-// Adding / Removing items from active workspace
-const addGadgetToCompare = (id) => {
-  if (comparedGadgetIds.value.length >= 4) return
-  
-  const normId = String(id).startsWith('g-') ? id : `g-${id}`
-  if (!comparedGadgetIds.value.includes(normId)) {
-    comparedGadgetIds.value.push(normId)
-  }
-  
-  searchQuery.value = ''
-  searchFocused.value = false
-}
-
-const removeGadgetFromCompare = (id) => {
-  const normId = String(id).startsWith('g-') ? id : `g-${id}`
-  comparedGadgetIds.value = comparedGadgetIds.value.filter(itemId => itemId !== normId)
-}
-
-const clearAllCompared = () => {
-  comparedGadgetIds.value = []
-  clearActiveSessionState()
-}
-
-
-// saved session lists helpers
-const fetchSessions = async () => {
-  loadingSessions.value = true
-  try {
-    const data = await getCompareSessions()
-    sessionsList.value = data
-  } catch (err) {
-    console.error('Gagal mengambil sesi komparasi:', err)
-  } finally {
-    loadingSessions.value = false
-  }
-}
-
-const loadSavedSession = (session) => {
-  activeSessionId.value = session.id
-  activeSessionTitle.value = session.title
-  comparedGadgetIds.value = session.gadgets.map(g => String(g.id).startsWith('g-') ? g.id : `g-${g.id}`)
-}
-
-const confirmDeleteSession = async (session) => {
-  if (!confirm(`Apakah Anda yakin ingin menghapus sesi komparasi "${session.title}"?`)) return
-  try {
-    await deleteCompareSession(session.id)
-    if (activeSessionId.value === session.id) {
-      clearActiveSessionState()
-    }
-    await fetchSessions()
-  } catch (err) {
-    alert(err.message || 'Gagal menghapus sesi komparasi.')
-  }
-}
-
-const clearActiveSessionState = () => {
-  activeSessionId.value = null
-  activeSessionTitle.value = ''
-}
-
-// Modal and Saving actions
-const openSaveModal = () => {
-  saveModalOpen.value = true
-}
-
-const handleSaveSession = async (titleInput, forceSaveAsNew = false) => {
-  const title = titleInput.trim() || defaultSessionTitle.value
-  
-  try {
-    if (activeSessionId.value && !forceSaveAsNew) {
-      // Overwrite/Update existing session
-      await updateCompareSession(activeSessionId.value, title, comparedGadgetIds.value)
-      activeSessionTitle.value = title
-    } else {
-      // Create fresh new session
-      const res = await createCompareSession(title, comparedGadgetIds.value)
-      if (res && res.session) {
-        activeSessionId.value = res.session.id
-        activeSessionTitle.value = res.session.title
-      }
-    }
-    
-    saveModalOpen.value = false
-    await fetchSessions()
-  } catch (err) {
-    alert(err.message || 'Gagal menyimpan sesi komparasi.')
-  }
-}
-
-
-// Standard helper utilities
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date) + ' WIB'
-}
-
-// Auth and Navigation redirects
-function goLogin() { router.push('/login') }
-function goAdmin() { router.push('/admin') }
-function goDashboard() { router.push('/dashboard') }
-
-function logout() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('role')
-  localStorage.removeItem('userFullName')
-  localStorage.removeItem('userEmail')
-  
-  token.value = ''
-  role.value = ''
-  userName.value = ''
-  
-  if (router.currentRoute.value.path !== '/') {
-    router.push('/')
-  } else {
-    location.reload()
-  }
-}
+const {
+  logo,
+  token,
+  role,
+  userName,
+  userEmail,
+  userAvatar,
+  isAuthenticated,
+  isMember,
+  profileOpen,
+  comparedGadgetIds,
+  comparedGadgetsData,
+  loadingCompare,
+  activeSessionId,
+  activeSessionTitle,
+  searchQuery,
+  searchFocused,
+  searchInputRef,
+  sessionsList,
+  loadingSessions,
+  saveModalOpen,
+  defaultSessionTitle,
+  searchResults,
+  formatPrice,
+  addGadgetToCompare,
+  removeGadgetFromCompare,
+  clearAllCompared,
+  loadSavedSession,
+  confirmDeleteSession,
+  clearActiveSessionState,
+  openSaveModal,
+  handleSaveSession,
+  formatDate,
+  goLogin,
+  goAdmin,
+  goDashboard,
+  logout
+} = useCompareView()
 </script>
 
 <style scoped>
