@@ -7,6 +7,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const gadgetRoutes = require('./routes/gadgetRoutes');
 const userRoutes = require('./routes/userRoutes');
 const compareRoutes = require('./routes/compareRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
 const path = require('path');
 
 const app = express();
@@ -26,6 +28,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/gadgets', gadgetRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/compare', compareRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({
