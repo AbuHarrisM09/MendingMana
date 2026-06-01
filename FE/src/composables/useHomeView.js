@@ -5,6 +5,7 @@ import { getGadgets } from '../services/gadgetService.js';
 import {
   SlidersHorizontal, Smartphone, Monitor, Tablet, Headphones, Watch
 } from 'lucide-vue-next';
+import { loadWishlist } from '../services/wishlistService';
 
 export function useHomeView() {
   const router = useRouter();
@@ -29,6 +30,12 @@ export function useHomeView() {
 
   onMounted(async () => {
     document.addEventListener('click', closeDropdown);
+    
+    // Load wishlist in background if authenticated
+    if (isAuthenticated.value) {
+      loadWishlist().catch(() => {});
+    }
+
     try {
       const data = await getGadgets();
       gadgets.value = data;

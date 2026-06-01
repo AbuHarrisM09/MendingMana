@@ -270,7 +270,7 @@
                   </div>
                   <div class="mt-auto w-full flex items-center justify-between">
                     <p class="text-slate-800 font-black text-lg tracking-tight">{{ formatPrice(item.price) }}</p>
-                    <button class="w-10 h-10 rounded-xl bg-pink-50 text-pink-500 hover:bg-pink-100 flex items-center justify-center transition-colors hover:scale-110" title="Hapus dari wishlist">
+                    <button @click.prevent="handleRemoveWishlist(item.id)" class="w-10 h-10 rounded-xl bg-pink-50 text-pink-500 hover:bg-pink-100 flex items-center justify-center transition-colors hover:scale-110" title="Hapus dari wishlist">
                       <Heart class="w-5 h-5 fill-current" />
                     </button>
                   </div>
@@ -309,6 +309,7 @@ const {
   profileStats,
   tabs,
   formatPrice,
-  logout
+  logout,
+  handleRemoveWishlist
 } = useUserDashboard();
 </script>

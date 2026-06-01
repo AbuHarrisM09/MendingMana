@@ -3,6 +3,7 @@ import logo from '../assets/logo.jpeg';
 import { useRouter } from 'vue-router';
 import { getUserProfile, getUserWishlist, getUserReviews } from '../services/userService';
 import { LayoutDashboard, MessageSquare, Heart } from 'lucide-vue-next';
+import { removeFromWishlist } from '../services/wishlistService';
 
 export function useUserDashboard() {
   const router = useRouter();
@@ -75,6 +76,21 @@ export function useUserDashboard() {
     loadData();
   });
 
+  async function handleRemoveWishlist(gadgetId) {
+    try {
+      await removeFromWishlist(gadgetId);
+      // Remove from reactive list
+      wishlist.value = wishlist.value.filter(
+        item => item.id !== gadgetId && item.id !== `g-${gadgetId}`
+      );
+      if (profile.value?.stats) {
+        profile.value.stats.totalWishlist = Math.max(0, Number(profile.value.stats.totalWishlist) - 1);
+      }
+    } catch (err) {
+      console.error('Gagal menghapus dari wishlist:', err);
+    }
+  }
+
   return {
     logo,
     loading,
@@ -88,6 +104,7 @@ export function useUserDashboard() {
     tabs,
     formatPrice,
     logout,
-    loadData
+    loadData,
+    handleRemoveWishlist
   };
 }

@@ -80,9 +80,11 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { Heart, GitCompare, Flame, Zap } from 'lucide-vue-next'
 import StarRating from './StarRating.vue'
 import { formatPrice } from '../../data/mockData.js'
+import { wishlistIds, toggleWishlist } from '../../services/wishlistService.js'
 
 const props = defineProps({
   gadget: {
@@ -92,26 +94,32 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['login-required'])
+const router = useRouter()
 
-// Mock auth & state for now
-const isAuthenticated = true // Replace with actual auth check later
-const isWishlisted = false
+const cleanId = computed(() => {
+  return String(props.gadget.id).replace('g-', '')
+})
+
+const token = computed(() => localStorage.getItem('token'))
+const isAuthenticated = computed(() => Boolean(token.value))
+const isWishlisted = computed(() => wishlistIds.value.has(cleanId.value))
 const isInCompare = false
 
-const handleWishlist = () => {
-  if (!isAuthenticated) {
-    emit('login-required')
+const handleWishlist = async () => {
+  if (!isAuthenticated.value) {
+    // If not authenticated, redirect to login
+    router.push('/login')
     return
   }
-  // Toggle wishlist logic
+  try {
+    await toggleWishlist(props.gadget.id)
+  } catch (err) {
+    console.error('Gagal mengubah wishlist:', err)
+  }
 }
 
 const handleCompare = () => {
-  if (!isAuthenticated) {
-    emit('login-required')
-    return
-  }
-  // Add to compare logic
+  router.push(`/compare?ids=${props.gadget.id}`)
 }
 
 const formattedPrice = computed(() => {
