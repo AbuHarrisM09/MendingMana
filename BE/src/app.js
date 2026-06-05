@@ -16,9 +16,35 @@ const app = express();
 // Ekspos folder uploads secara statis agar foto bisa diakses dengan URL
 app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://mendingmana.vercel.app'
+];
+
+if (env.clientOrigin) {
+  const cleanOrigin = env.clientOrigin.replace(/\/$/, '');
+  if (!allowedOrigins.includes(cleanOrigin)) {
+    allowedOrigins.push(cleanOrigin);
+  }
+}
+
 app.use(
   cors({
-    origin: env.clientOrigin,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, or postman)
+      if (!origin) return callback(null, true);
+      
+      const cleanOrigin = origin.replace(/\/$/, '');
+      
+      if (
+        allowedOrigins.includes(cleanOrigin) ||
+        cleanOrigin.endsWith('.vercel.app')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS: ' + origin));
+      }
+    },
     credentials: true,
   })
 );

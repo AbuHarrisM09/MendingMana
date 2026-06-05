@@ -1,7 +1,11 @@
 {
+<<<<<<< HEAD
   "cleanUrls": true,
   "trailingSlash": false,
   "routes": [
+=======
+  "rewrites": [
+>>>>>>> pengembangan
     {
       "src": "/api/(.*)",
       "dest": "https://mendingmana-production.up.railway.app/api/$1"
@@ -11,11 +15,16 @@
       "dest": "https://mendingmana-production.up.railway.app/uploads/$1"
     },
     {
+<<<<<<< HEAD
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
+=======
+      "source": "/((?!api|uploads).*)",
+      "destination": "/index.html"
+>>>>>>> pengembangan
     }
   ]
 }
