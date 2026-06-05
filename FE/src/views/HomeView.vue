@@ -29,22 +29,22 @@
           </div>
 
           <!-- Nav links -->
-          <div class="flex items-center gap-3">
-            <router-link to="/compare" class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors px-2 py-1">Komparasi</router-link>
-            <router-link to="/about" class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors px-2 py-1">About</router-link>
+          <div class="flex items-center gap-1.5 sm:gap-3">
+            <router-link to="/compare" class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors px-1.5 py-0.5 sm:px-2 sm:py-1">Komparasi</router-link>
+            <router-link to="/about" class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors px-1.5 py-0.5 sm:px-2 sm:py-1">About</router-link>
 
             <template v-if="isAuthenticated">
-              <div class="relative ml-2">
+              <div class="relative ml-1 sm:ml-2">
                 <button
                   @click="profileOpen = !profileOpen"
-                  class="flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-50 transition-colors focus:outline-none"
+                  class="flex items-center gap-1.5 px-1.5 py-1 sm:gap-2 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-50 transition-colors focus:outline-none"
                 >
                   <img
                     :src="userAvatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userName || 'Member') + '&background=3b82f6&color=fff&bold=true'"
                     :alt="userName"
-                    class="w-8 h-8 rounded-full object-cover ring-2 ring-slate-100"
+                    class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-slate-100"
                   />
-                  <span class="text-sm font-bold text-slate-700 hidden sm:inline">{{ userName ? userName.split(' ')[0] : 'Member' }}</span>
+                  <span class="text-xs sm:text-sm font-bold text-slate-700 hidden sm:inline">{{ userName ? userName.split(' ')[0] : 'Member' }}</span>
                   <ChevronDown class="w-4 h-4 text-slate-400 hidden sm:inline" />
                 </button>
 
@@ -81,7 +81,7 @@
 
             <template v-else>
               <button
-                class="px-5 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
+                class="px-3 py-1.5 sm:px-5 sm:py-2 bg-slate-900 text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
                 @click="goLogin"
               >
                 Masuk

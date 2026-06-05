@@ -1,30 +1,16 @@
 {
-<<<<<<< HEAD
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "routes": [
-=======
   "rewrites": [
->>>>>>> pengembangan
     {
-      "src": "/api/(.*)",
-      "dest": "https://mendingmana-production.up.railway.app/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://mendingmana-production.up.railway.app/api/:path*"
     },
     {
-      "src": "/uploads/(.*)",
-      "dest": "https://mendingmana-production.up.railway.app/uploads/$1"
+      "source": "/uploads/:path*",
+      "destination": "https://mendingmana-production.up.railway.app/uploads/:path*"
     },
     {
-<<<<<<< HEAD
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-=======
       "source": "/((?!api|uploads).*)",
       "destination": "/index.html"
->>>>>>> pengembangan
     }
   ]
 }

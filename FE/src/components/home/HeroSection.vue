@@ -47,12 +47,12 @@
           />
           
           <!-- Floating detail cards -->
-          <div class="absolute z-20 bottom-10 -left-10 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl animate-fade-in-up delay-600" style="opacity:0; animation-fill-mode: forwards;">
+          <div class="absolute z-20 bottom-10 left-2 sm:-left-10 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl animate-fade-in-up delay-600" style="opacity:0; animation-fill-mode: forwards;">
             <div class="text-xs text-slate-500 font-medium mb-1">Harga Mulai</div>
             <div class="text-lg font-extrabold text-slate-900">{{ formatPrice(heroGadget.price) }}</div>
           </div>
           
-          <div class="absolute z-20 top-20 -right-4 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl flex items-center gap-3 animate-fade-in-up delay-800" style="opacity:0; animation-fill-mode: forwards;">
+          <div class="absolute z-20 top-20 right-2 sm:-right-4 bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-white shadow-xl flex items-center gap-3 animate-fade-in-up delay-800" style="opacity:0; animation-fill-mode: forwards;">
             <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
               <Star class="w-5 h-5 text-amber-500 fill-current" />
             </div>
