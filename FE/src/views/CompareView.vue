@@ -148,14 +148,16 @@
               <!-- Search Dropdown Suggestion List -->
               <Transition name="fade">
                 <div 
-                  v-if="searchFocused && searchQuery.trim().length > 0" 
+                  v-if="searchFocused" 
                   class="absolute left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-2xl py-2 z-50 max-h-80 overflow-y-auto custom-scrollbar animate-scale-in"
                 >
                   <div v-if="searchResults.length === 0" class="px-4 py-6 text-center text-slate-400">
                     <p class="text-sm font-medium">Gadget tidak ditemukan atau sudah ditambahkan</p>
                   </div>
                   <div v-else>
-                    <div class="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Hasil Pencarian</div>
+                    <div class="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      {{ searchQuery.trim() ? 'Hasil Pencarian' : 'Daftar Gadget Pilihan' }}
+                    </div>
                     <button
                       v-for="gadget in searchResults"
                       :key="gadget.id"

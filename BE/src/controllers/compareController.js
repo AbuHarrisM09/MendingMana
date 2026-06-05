@@ -32,7 +32,7 @@ exports.compareInstant = async (req, res) => {
 // 2. Get All Comparison Sessions for Current User
 exports.getSessions = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.sub;
     const rows = await compareModel.findSessionsByUser(userId);
 
     const sessions = rows.map(row => ({
@@ -59,7 +59,7 @@ exports.getSessions = async (req, res) => {
 exports.createSession = async (req, res) => {
   const client = await pool.connect();
   try {
-    const userId = req.user.id;
+    const userId = req.user.sub;
     let { title, gadgetIds } = req.body;
 
     if (gadgetIds && typeof gadgetIds === 'string') {
@@ -103,7 +103,7 @@ exports.createSession = async (req, res) => {
 // 4. Get Detailed Session By ID
 exports.getSessionById = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.sub;
     const sessionId = req.params.id;
 
     const session = await compareModel.findSessionByIdAndUser(sessionId, userId);
@@ -131,7 +131,7 @@ exports.getSessionById = async (req, res) => {
 exports.updateSession = async (req, res) => {
   const client = await pool.connect();
   try {
-    const userId = req.user.id;
+    const userId = req.user.sub;
     const sessionId = req.params.id;
     let { title, gadgetIds } = req.body;
 
@@ -172,7 +172,7 @@ exports.updateSession = async (req, res) => {
 // 6. Delete Session
 exports.deleteSession = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.sub;
     const sessionId = req.params.id;
 
     const rowCount = await compareModel.deleteSession(sessionId, userId);
@@ -190,7 +190,7 @@ exports.deleteSession = async (req, res) => {
 // 7. Add Single Item to Session
 exports.addSessionItem = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.sub;
     const sessionId = req.params.id;
     const { gadgetId } = req.body;
 
@@ -217,7 +217,7 @@ exports.addSessionItem = async (req, res) => {
 // 8. Remove Single Item from Session
 exports.removeSessionItem = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.sub;
     const sessionId = req.params.id;
     const { gadgetId } = req.params;
 

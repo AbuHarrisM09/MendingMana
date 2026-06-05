@@ -67,13 +67,19 @@ export function useCompareView() {
 
   // Search matches computed
   const searchResults = computed(() => {
-    if (!searchQuery.value.trim()) return [];
-    const q = searchQuery.value.toLowerCase();
-    return allGadgets.value.filter(g => 
-      g.name.toLowerCase().includes(q) ||
-      g.brand.toLowerCase().includes(q) ||
-      g.category.toLowerCase().includes(q)
-    ).filter(g => {
+    const isSearchEmpty = !searchQuery.value.trim();
+    let list = allGadgets.value;
+    
+    if (!isSearchEmpty) {
+      const q = searchQuery.value.toLowerCase();
+      list = list.filter(g => 
+        g.name.toLowerCase().includes(q) ||
+        g.brand.toLowerCase().includes(q) ||
+        g.category.toLowerCase().includes(q)
+      );
+    }
+    
+    const filtered = list.filter(g => {
       // Normalize IDs to make sure comparison matches e.g. "g-1" vs "g-1" or "1"
       const isAdded = comparedGadgetIds.value.some(addedId => {
         const addedNum = String(addedId).replace('g-', '');
@@ -82,6 +88,9 @@ export function useCompareView() {
       });
       return !isAdded;
     });
+
+    // If query is empty, show the first 10 available gadgets for quick selection
+    return isSearchEmpty ? filtered.slice(0, 10) : filtered;
   });
 
   onMounted(async () => {
