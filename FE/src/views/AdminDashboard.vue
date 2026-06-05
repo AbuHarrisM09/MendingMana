@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex bg-[#F8F9FA] font-sans text-slate-800">
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-slate-100 flex flex-col hidden md:flex z-10 transition-all duration-300">
+    <aside class="w-64 bg-white border-r border-slate-100 flex flex-col hidden md:flex z-10 transition-all duration-300 sticky top-0 h-screen overflow-y-auto">
       <div class="h-16 flex items-center px-6 border-b border-slate-50 shrink-0">
         <router-link to="/" class="flex items-center gap-2.5">
           <img :src="logo" alt="Mending Mana Logo" class="w-8 h-8 object-cover rounded-xl shadow-lg shadow-blue-600/20" />
