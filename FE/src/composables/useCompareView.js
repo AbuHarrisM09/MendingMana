@@ -10,6 +10,7 @@ import {
   deleteCompareSession
 } from '../services/compareService';
 import { formatPrice } from '../data/mockData.js';
+import { useToast } from './useToast';
 
 export function useCompareView() {
   const router = useRouter();
@@ -260,9 +261,12 @@ export function useCompareView() {
     role.value = '';
     userName.value = '';
     
+    const { showToast } = useToast();
     if (router.currentRoute.value.path !== '/') {
+      showToast('Anda berhasil keluar dari akun.', 'success');
       router.push('/');
     } else {
+      localStorage.setItem('logoutToast', 'true');
       location.reload();
     }
   }

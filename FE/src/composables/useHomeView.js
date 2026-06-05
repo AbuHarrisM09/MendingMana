@@ -6,6 +6,7 @@ import {
   SlidersHorizontal, Smartphone, Monitor, Tablet, Headphones, Watch
 } from 'lucide-vue-next';
 import { loadWishlist } from '../services/wishlistService';
+import { useToast } from './useToast';
 
 export function useHomeView() {
   const router = useRouter();
@@ -64,6 +65,9 @@ export function useHomeView() {
     token.value = '';
     role.value = '';
     userName.value = '';
+    
+    const { showToast } = useToast();
+    showToast('Anda berhasil keluar dari akun.', 'success');
     
     if (router.currentRoute.value.path !== '/') {
       router.push('/');

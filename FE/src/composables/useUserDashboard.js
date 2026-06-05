@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { getUserProfile, getUserWishlist, getUserReviews } from '../services/userService';
 import { LayoutDashboard, MessageSquare, Heart } from 'lucide-vue-next';
 import { removeFromWishlist } from '../services/wishlistService';
+import { useToast } from './useToast';
 
 export function useUserDashboard() {
   const router = useRouter();
@@ -44,6 +45,8 @@ export function useUserDashboard() {
     localStorage.removeItem('role');
     localStorage.removeItem('userFullName');
     localStorage.removeItem('userEmail');
+    const { showToast } = useToast();
+    showToast('Anda berhasil keluar dari akun.', 'success');
     router.push('/login');
   }
 

@@ -2,6 +2,7 @@ import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { login, register } from "../services/authService";
 import logo from "../assets/logo.jpeg";
+import { useToast } from "./useToast";
 
 export function useLoginView() {
   const router = useRouter();
@@ -117,6 +118,10 @@ export function useLoginView() {
         localStorage.setItem("role", result.user?.role || "member");
         localStorage.setItem("userFullName", result.user?.fullName || "");
         localStorage.setItem("userEmail", result.user?.email || "");
+        
+        const { showToast } = useToast();
+        showToast(`Selamat datang kembali, ${result.user?.fullName || 'User'}!`, 'success');
+
         if (result.user?.role === "admin") {
           router.push("/admin");
         } else {

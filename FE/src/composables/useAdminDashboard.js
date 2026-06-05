@@ -5,6 +5,7 @@ import axios from "axios";
 import {
   LayoutDashboard, Smartphone, Users, MessageSquare
 } from "lucide-vue-next";
+import { useToast } from "./useToast";
 
 export function useAdminDashboard() {
   const router = useRouter();
@@ -249,6 +250,8 @@ export function useAdminDashboard() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("adminActiveTab");
+    const { showToast } = useToast();
+    showToast("Anda berhasil keluar dari akun.", "success");
     router.push("/");
   }
 

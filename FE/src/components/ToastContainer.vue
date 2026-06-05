@@ -37,10 +37,11 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
 import { useToast } from '../composables/useToast';
 import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-vue-next';
 
-const { toasts, removeToast } = useToast();
+const { toasts, removeToast, showToast } = useToast();
 
 const getIcon = (type) => {
   switch (type) {
@@ -50,6 +51,17 @@ const getIcon = (type) => {
     default: return CheckCircle2;
   }
 };
+
+onMounted(() => {
+  if (localStorage.getItem('logoutToast') === 'true') {
+    showToast('Anda berhasil keluar dari akun.', 'success');
+    localStorage.removeItem('logoutToast');
+  }
+  if (localStorage.getItem('loginToast') === 'true') {
+    showToast('Selamat datang kembali!', 'success');
+    localStorage.removeItem('loginToast');
+  }
+});
 </script>
 
 <style scoped>
