@@ -11,7 +11,7 @@
       "destination": "https://mendingmana-production.up.railway.app/uploads/:path*"
     },
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]

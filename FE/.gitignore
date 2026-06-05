@@ -24,3 +24,4 @@ patokan
 *.sln
 *.sw?
 .vercel
+.env*
