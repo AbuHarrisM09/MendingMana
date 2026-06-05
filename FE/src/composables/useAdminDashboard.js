@@ -1,4 +1,4 @@
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import logo from "../assets/logo.jpeg";
 import { useRouter } from "vue-router";
 import axios from "axios";
@@ -11,7 +11,12 @@ export function useAdminDashboard() {
 
   const userName = ref(localStorage.getItem("userFullName") || "");
   const userEmail = ref(localStorage.getItem("userEmail") || "");
-  const activeTab = ref("dashboard");
+  const activeTab = ref(localStorage.getItem("adminActiveTab") || "dashboard");
+
+  // Keep track of the active tab on refresh
+  watch(activeTab, (newTab) => {
+    localStorage.setItem("adminActiveTab", newTab);
+  });
 
   const data = ref(null);
   const loading = ref(true);
@@ -243,6 +248,7 @@ export function useAdminDashboard() {
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("adminActiveTab");
     router.push("/");
   }
 

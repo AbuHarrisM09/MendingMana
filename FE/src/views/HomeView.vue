@@ -120,7 +120,14 @@
         </div>
       </div>
 
-      <div v-if="filteredGadgets.length === 0" class="text-center py-24 bg-white rounded-3xl border border-slate-200 border-dashed animate-fade-in">
+      <!-- Loading State -->
+      <div v-if="loading" class="flex flex-col items-center justify-center py-24 animate-fade-in">
+        <div class="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin mb-4 shadow-sm"></div>
+        <p class="text-slate-500 text-sm font-bold tracking-wide">Memuat katalog gadget...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="filteredGadgets.length === 0" class="text-center py-24 bg-white rounded-3xl border border-slate-200 border-dashed animate-fade-in">
         <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <Search class="w-10 h-10 text-slate-400" />
         </div>
@@ -134,6 +141,7 @@
         </button>
       </div>
 
+      <!-- Grid Data -->
       <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         <div
           v-for="(gadget, index) in filteredGadgets"

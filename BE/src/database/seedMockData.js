@@ -372,6 +372,26 @@ async function seedMockData() {
 
       const reviewId = await ensureReview(review, gadgetId, userId);
       await ensureReviewMedia(reviewId, review.photos || []);
+
+      if (review.reportedBy && review.reportedBy.length > 0) {
+        for (const reporterMockId of review.reportedBy) {
+          const reporterUserId = userIdMap.get(reporterMockId);
+          if (!reporterUserId) continue;
+
+          const exists = await query(
+            'SELECT 1 FROM review_reports WHERE review_id = $1 AND reporter_user_id = $2 LIMIT 1',
+            [reviewId, reporterUserId]
+          );
+          if (!exists.rows[0]) {
+            await query(
+              `INSERT INTO review_reports (review_id, user_id, reporter_user_id, reason_code, reason, status)
+               VALUES ($1, $2, $3, $4, $5, $6)`,
+              [reviewId, reporterUserId, reporterUserId, 'spam', 'Konten ulasan dilaporkan oleh pengguna sebagai tidak pantas atau spam.', review.status || 'pending']
+            );
+            console.log(`Seeded report on review ${reviewId} by user ${reporterUserId}`);
+          }
+        }
+      }
     }
 
     for (const item of mockWishlist || []) {
