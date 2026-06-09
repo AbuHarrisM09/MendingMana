@@ -84,13 +84,15 @@
           </div>
 
           <div class="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-            <div v-for="(spec, index) in gadgetForm.specs" :key="index" class="flex gap-2 items-center">
-              <input v-model="spec.spec_group" type="text" placeholder="Grup (e.g. Layar)" class="w-1/3 px-3 py-2 bg-slate-50 border border-transparent focus:border-blue-500 rounded-lg text-xs outline-none transition-all" />
-              <input v-model="spec.spec_key" type="text" placeholder="Kunci (e.g. Resolusi)" class="w-1/3 px-3 py-2 bg-slate-50 border border-transparent focus:border-blue-500 rounded-lg text-xs outline-none transition-all" required />
-              <input v-model="spec.spec_value" type="text" placeholder="Nilai (e.g. 1080p)" class="w-1/3 px-3 py-2 bg-slate-50 border border-transparent focus:border-blue-500 rounded-lg text-xs outline-none transition-all" required />
-              <button type="button" @click="$emit('remove-spec', index)" class="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors shrink-0">
-                <MinusCircle class="w-4 h-4" />
-              </button>
+            <div v-for="(spec, index) in gadgetForm.specs" :key="index" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center border-b border-slate-100 sm:border-b-0 pb-3 sm:pb-0">
+              <input v-model="spec.spec_group" type="text" placeholder="Grup (e.g. Layar)" class="w-full sm:w-1/3 px-3 py-2 bg-slate-50 border border-transparent focus:border-blue-500 rounded-lg text-xs outline-none transition-all" />
+              <input v-model="spec.spec_key" type="text" placeholder="Kunci (e.g. Resolusi)" class="w-full sm:w-1/3 px-3 py-2 bg-slate-50 border border-transparent focus:border-blue-500 rounded-lg text-xs outline-none transition-all" required />
+              <div class="flex gap-2 items-center w-full sm:w-1/3">
+                <input v-model="spec.spec_value" type="text" placeholder="Nilai (e.g. 1080p)" class="flex-1 px-3 py-2 bg-slate-50 border border-transparent focus:border-blue-500 rounded-lg text-xs outline-none transition-all" required />
+                <button type="button" @click="$emit('remove-spec', index)" class="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors shrink-0">
+                  <MinusCircle class="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div v-if="!gadgetForm.specs || gadgetForm.specs.length === 0" class="text-center py-4 text-xs text-slate-400">
               Belum ada spesifikasi yang ditambahkan.

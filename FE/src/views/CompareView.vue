@@ -76,7 +76,7 @@
       <div class="grid lg:grid-cols-4 gap-8">
         
         <!-- Left Panel: Comparison Workspace & Matrix (Span 3 Columns) -->
-        <div class="lg:col-span-3 space-y-6">
+        <div class="lg:col-span-3 space-y-6 min-w-0">
           
           <!-- Glassmorphic Header & Search Card -->
           <div class="bg-white/70 backdrop-blur-xl border border-white shadow-xl shadow-slate-100/50 p-6 rounded-3xl animate-fade-in-up relative z-20">

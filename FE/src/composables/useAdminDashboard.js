@@ -30,6 +30,7 @@ export function useAdminDashboard() {
   const showFormModal = ref(false);
   const isEditing = ref(false);
   const editingGadgetId = ref(null);
+  const isSidebarOpen = ref(false);
 
   const gadgetForm = ref({
     name: "",
@@ -269,6 +270,7 @@ export function useAdminDashboard() {
     showFormModal,
     isEditing,
     editingGadgetId,
+    isSidebarOpen,
     gadgetForm,
     selectedFiles,
     filePreviews,

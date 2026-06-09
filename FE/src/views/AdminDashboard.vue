@@ -1,7 +1,19 @@
 <template>
-  <div class="min-h-screen flex bg-[#F8F9FA] font-sans text-slate-800">
+  <div class="h-screen flex bg-[#F8F9FA] font-sans text-slate-800 relative overflow-hidden">
+    <!-- Sidebar Backdrop (Mobile only) -->
+    <div 
+      v-if="isSidebarOpen" 
+      @click="isSidebarOpen = false" 
+      class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 md:hidden transition-all duration-300"
+    ></div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-slate-100 flex flex-col hidden md:flex z-10 transition-all duration-300 sticky top-0 h-screen overflow-y-auto">
+    <aside 
+      :class="[
+        'w-64 bg-white border-r border-slate-100 flex flex-col fixed inset-y-0 left-0 z-40 transition-transform duration-300 md:static md:translate-x-0 h-screen overflow-y-auto shrink-0',
+        isSidebarOpen ? 'translate-x-0 shadow-2xl shadow-slate-950/20' : '-translate-x-full'
+      ]"
+    >
       <div class="h-16 flex items-center px-6 border-b border-slate-50 shrink-0">
         <router-link to="/" class="flex items-center gap-2.5">
           <img :src="logo" alt="Mending Mana Logo" class="w-8 h-8 object-cover rounded-xl shadow-lg shadow-blue-600/20" />
@@ -15,7 +27,7 @@
           <button
             v-for="item in sidebarItems"
             :key="item.id"
-            @click="activeTab = item.id"
+            @click="setActiveTab(item.id); isSidebarOpen = false"
             :class="[
               'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 relative',
               activeTab === item.id
@@ -54,7 +66,7 @@
       <!-- Header -->
       <header class="bg-white/80 backdrop-blur-xl border-b border-slate-100 h-16 flex items-center justify-between px-6 shrink-0 z-20 sticky top-0 shadow-sm">
         <div class="flex items-center gap-4">
-          <button class="md:hidden text-slate-400 hover:text-slate-600 transition-colors">
+          <button @click="isSidebarOpen = true" class="md:hidden text-slate-400 hover:text-slate-600 transition-colors">
             <Menu class="w-5 h-5" />
           </button>
           <div class="relative hidden sm:block">
@@ -68,7 +80,7 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <button class="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors">
+          <button @click="setActiveTab('reviews')" class="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors" title="Moderasi Ulasan">
             <Bell class="w-5 h-5" />
             <span v-if="data?.overview?.pendingModeration" class="absolute top-1 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
           </button>
@@ -101,7 +113,7 @@
         <DashboardOverview
           v-else-if="data && activeTab === 'dashboard'"
           :data="data"
-          @change-tab="activeTab = $event"
+          @change-tab="setActiveTab"
         />
 
         <!-- Gadget Management Tab -->
@@ -133,7 +145,7 @@
       :brands="brands"
       :categories="categories"
       :file-previews="filePreviews"
-      @close="showFormModal = false"
+      @close="closeFormModal"
       @save="saveGadget"
       @file-change="handleFileChange"
       @add-spec="addSpecRow"
@@ -143,6 +155,7 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import {
   Globe, LogOut, Menu, Search, Bell
 } from "lucide-vue-next";
@@ -178,4 +191,14 @@ const {
   deleteGadget,
   logout
 } = useAdminDashboard();
+
+const isSidebarOpen = ref(false);
+
+const setActiveTab = (tab) => {
+  activeTab.value = tab;
+};
+
+const closeFormModal = () => {
+  showFormModal.value = false;
+};
 </script>
