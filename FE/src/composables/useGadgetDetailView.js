@@ -1,4 +1,4 @@
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import logo from '../assets/logo.jpeg';
 import { getGadgetById } from '../services/gadgetService';
@@ -207,6 +207,17 @@ export function useGadgetDetailView() {
     }
   }
 
+  function scrollToReviewForm() {
+    const el = document.getElementById('review-form-section');
+    if (el) {
+      const offset = 80; // account for sticky navbar height
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    } else if (!isAuthenticated.value) {
+      router.push('/login');
+    }
+  }
+
   onMounted(() => {
     fetchGadget();
   });
@@ -236,6 +247,7 @@ export function useGadgetDetailView() {
     submitReview,
     handleVote,
     handleDeleteReview,
+    scrollToReviewForm,
     userFullName,
     userRole,
     userEmail,

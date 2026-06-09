@@ -149,7 +149,7 @@
               Bandingkan
             </button>
             <button
-              @click="$router.push('/login')"
+              @click="scrollToReviewForm"
               class="flex-1 flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl text-sm font-bold transition-all shadow-lg hover:scale-[1.02] hover:shadow-blue-500/30"
             >
               <StarIcon class="w-5 h-5" />
@@ -310,7 +310,7 @@
             </div>
 
             <!-- Review Form Section (Only if Logged In) -->
-            <div v-if="isAuthenticated" class="bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl rounded-[2rem] p-6 md:p-8 animate-fade-in-up mt-8">
+            <div id="review-form-section" v-if="isAuthenticated" class="bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl rounded-[2rem] p-6 md:p-8 animate-fade-in-up mt-8">
               <h3 class="text-slate-900 font-extrabold text-xl mb-2 flex items-center gap-2">
                 Tulis Ulasan Anda
               </h3>
@@ -378,7 +378,7 @@
             </div>
 
             <!-- Review form CTA (Only if NOT Loged In) -->
-            <div v-else class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-[2rem] p-8 text-center shadow-lg relative overflow-hidden mt-8">
+            <div id="review-form-section" v-else class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-[2rem] p-8 text-center shadow-lg relative overflow-hidden mt-8">
               <div class="absolute top-0 right-0 w-64 h-64 bg-blue-200/40 rounded-full blur-3xl -z-10 mix-blend-multiply"></div>
               <h3 class="text-slate-900 text-xl font-extrabold mb-3">
                 Punya pengalaman dengan {{ gadget.name }}?
@@ -438,6 +438,7 @@ const {
   submitReview,
   handleVote,
   handleDeleteReview,
+  scrollToReviewForm,
   currentUserId,
   userRole
 } = useGadgetDetailView();
