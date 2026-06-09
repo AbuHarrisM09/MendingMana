@@ -83,23 +83,23 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Fitur Komparasi</span>
-                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2">Bandingkan Spek Gadget</h1>
-                <p class="text-sm text-slate-500 mt-1">Cari dan pilih hingga 4 gadget untuk dibandingkan spesifikasinya secara berdampingan.</p>
+                <h1 class="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-2">Bandingkan Spek Gadget</h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Cari dan pilih hingga 4 gadget untuk dibandingkan spesifikasinya secara berdampingan.</p>
               </div>
               
               <!-- Session Actions (If there are gadgets and logged in) -->
-              <div v-if="comparedGadgetIds.length > 0" class="flex items-center gap-2">
+              <div v-if="comparedGadgetIds.length > 0" class="flex items-center gap-2 flex-wrap">
                 <button 
                   v-if="isMember" 
                   @click="openSaveModal"
-                  class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-600/15 hover:shadow-blue-600/25 transition-all"
+                  class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-blue-600/15 hover:shadow-blue-600/25 transition-all"
                 >
                   <Save class="w-4 h-4" />
                   {{ activeSessionId ? 'Update Sesi' : 'Simpan Sesi' }}
                 </button>
                 <button 
                   @click="clearAllCompared"
-                  class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-all"
+                  class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold rounded-xl transition-all"
                 >
                   <RefreshCw class="w-4 h-4" />
                   Reset
