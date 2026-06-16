@@ -10,8 +10,13 @@ const compareRoutes = require('./routes/compareRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./config/swagger');
 
 const app = express();
+
+// Rute Dokumentasi API Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Ekspos folder uploads secara statis agar foto bisa diakses dengan URL
 app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
@@ -60,7 +65,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'MendingMana backend is running.',
-    docs: '/api/health',
+    docs: '/api-docs',
   });
 });
 

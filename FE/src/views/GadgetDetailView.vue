@@ -261,9 +261,6 @@
                     <div>
                       <div class="flex items-center gap-2">
                         <span class="font-extrabold text-slate-800 text-sm sm:text-base">{{ rev.userName }}</span>
-                        <span class="px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-bold rounded-md border border-green-100 flex items-center gap-0.5">
-                          <CheckCircle class="w-3 h-3 text-green-500" /> Verified
-                        </span>
                       </div>
                       <div class="flex items-center gap-1.5 mt-1">
                         <div class="flex items-center text-amber-400">
