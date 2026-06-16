@@ -24,7 +24,7 @@ export function useHomeView() {
 
   // Close profile dropdown when clicking outside
   const closeDropdown = (e) => {
-    if (profileOpen.value && !e.target.closest('.relative.ml-2')) {
+    if (profileOpen.value && !e.target.closest('[data-profile-dropdown]')) {
       profileOpen.value = false;
     }
   };

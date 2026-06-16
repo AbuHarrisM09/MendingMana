@@ -29,7 +29,7 @@ export function useCompareView() {
 
   // Closing standard dropdown and suggestions
   const closeDropdown = (e) => {
-    if (profileOpen.value && !e.target.closest('.relative.ml-2')) {
+    if (profileOpen.value && !e.target.closest('[data-profile-dropdown]')) {
       profileOpen.value = false;
     }
     if (searchFocused.value && !e.target.closest('.relative.max-w-2xl')) {

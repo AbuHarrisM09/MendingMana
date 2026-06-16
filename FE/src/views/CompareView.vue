@@ -16,7 +16,7 @@
             <router-link to="/compare" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg transition-all">Komparasi</router-link>
 
             <template v-if="isAuthenticated">
-              <div class="relative ml-2">
+              <div class="relative ml-2" data-profile-dropdown>
                 <button
                   @click="toggleProfile()"
                   class="flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-50 transition-colors focus:outline-none"
@@ -110,7 +110,6 @@
             <!-- Active Session Alert Badge -->
             <div v-if="activeSessionTitle" class="mb-4 flex items-center justify-between bg-blue-50/50 border border-blue-100 text-blue-800 px-4 py-2.5 rounded-2xl animate-fade-in">
               <div class="flex items-center gap-2 text-sm font-medium">
-                <Sparkles class="w-4 h-4 text-blue-600 animate-float" />
                 <span>Sesi Aktif: <strong class="font-bold text-blue-900">{{ activeSessionTitle }}</strong></span>
               </div>
               <button @click="clearActiveSessionState" class="text-xs text-blue-600 hover:text-blue-800 font-bold hover:underline">

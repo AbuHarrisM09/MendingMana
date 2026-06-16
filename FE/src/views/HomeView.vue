@@ -73,7 +73,7 @@
             <router-link to="/about" class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors px-1.5 py-0.5 sm:px-2 sm:py-1">About</router-link>
 
             <template v-if="isAuthenticated">
-              <div class="relative ml-1 sm:ml-2">
+              <div class="relative ml-1 sm:ml-2" data-profile-dropdown>
                 <button
                   @click="toggleProfile()"
                   class="flex items-center gap-1.5 px-1.5 py-1 sm:gap-2 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-50 transition-colors focus:outline-none"
