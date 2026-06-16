@@ -1,4 +1,4 @@
-import { fetchWithAuth } from './userService';
+import api from './api';
 
 /**
  * Public API: Perform on-the-fly gadget comparison
@@ -6,33 +6,21 @@ import { fetchWithAuth } from './userService';
  * @returns {Promise<{gadgets: Array<any>, specGroups: Array<any>}>}
  */
 export async function compareGadgets(gadgetIds) {
-  const res = await fetch('/api/compare', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ gadgetIds })
-  });
-  
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.message || 'Gagal membandingkan gadget');
-  }
-  return data;
+  return api.post('/api/compare', { gadgetIds });
 }
 
 /**
  * Member API: Fetch all comparison sessions saved by the member
  */
 export async function getCompareSessions() {
-  return fetchWithAuth('/api/compare/sessions');
+  return api.get('/api/compare/sessions');
 }
 
 /**
  * Member API: Fetch a single comparison session with details and specs matrix
  */
 export async function getCompareSessionById(id) {
-  return fetchWithAuth(`/api/compare/sessions/${id}`);
+  return api.get(`/api/compare/sessions/${id}`);
 }
 
 /**
@@ -41,10 +29,7 @@ export async function getCompareSessionById(id) {
  * @param {Array<string>} gadgetIds - Array of gadget IDs to include
  */
 export async function createCompareSession(title, gadgetIds) {
-  return fetchWithAuth('/api/compare/sessions', {
-    method: 'POST',
-    body: JSON.stringify({ title, gadgetIds })
-  });
+  return api.post('/api/compare/sessions', { title, gadgetIds });
 }
 
 /**
@@ -54,36 +39,26 @@ export async function createCompareSession(title, gadgetIds) {
  * @param {Array<string>} [gadgetIds] - Optional new gadget ID list
  */
 export async function updateCompareSession(id, title, gadgetIds) {
-  return fetchWithAuth(`/api/compare/sessions/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify({ title, gadgetIds })
-  });
+  return api.put(`/api/compare/sessions/${id}`, { title, gadgetIds });
 }
 
 /**
  * Member API: Delete a comparison session
  */
 export async function deleteCompareSession(id) {
-  return fetchWithAuth(`/api/compare/sessions/${id}`, {
-    method: 'DELETE'
-  });
+  return api.delete(`/api/compare/sessions/${id}`);
 }
 
 /**
  * Member API: Add single gadget to comparison session
  */
 export async function addCompareSessionItem(sessionId, gadgetId) {
-  return fetchWithAuth(`/api/compare/sessions/${sessionId}/items`, {
-    method: 'POST',
-    body: JSON.stringify({ gadgetId })
-  });
+  return api.post(`/api/compare/sessions/${sessionId}/items`, { gadgetId });
 }
 
 /**
  * Member API: Remove single gadget from comparison session
  */
 export async function removeCompareSessionItem(sessionId, gadgetId) {
-  return fetchWithAuth(`/api/compare/sessions/${sessionId}/items/${gadgetId}`, {
-    method: 'DELETE'
-  });
+  return api.delete(`/api/compare/sessions/${sessionId}/items/${gadgetId}`);
 }

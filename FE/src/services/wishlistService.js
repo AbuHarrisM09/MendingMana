@@ -1,4 +1,4 @@
-import { fetchWithAuth } from './userService';
+import api from './api';
 import { ref } from 'vue';
 
 // Shared global state for reactive wishlist sync
@@ -6,10 +6,7 @@ export const wishlistIds = ref(new Set());
 
 export async function toggleWishlist(gadgetId) {
   const cleanId = String(gadgetId).replace('g-', '');
-  const res = await fetchWithAuth('/api/wishlist/toggle', {
-    method: 'POST',
-    body: JSON.stringify({ gadget_id: cleanId }),
-  });
+  const res = await api.post('/api/wishlist/toggle', { gadget_id: cleanId });
   
   if (res.saved) {
     wishlistIds.value.add(cleanId);
@@ -22,7 +19,7 @@ export async function toggleWishlist(gadgetId) {
 export async function checkWishlist(gadgetId) {
   const cleanId = String(gadgetId).replace('g-', '');
   try {
-    const res = await fetchWithAuth(`/api/wishlist/check/${cleanId}`);
+    const res = await api.get(`/api/wishlist/check/${cleanId}`);
     if (res.saved) {
       wishlistIds.value.add(cleanId);
     } else {
@@ -36,16 +33,14 @@ export async function checkWishlist(gadgetId) {
 
 export async function removeFromWishlist(gadgetId) {
   const cleanId = String(gadgetId).replace('g-', '');
-  const res = await fetchWithAuth(`/api/wishlist/${cleanId}`, {
-    method: 'DELETE',
-  });
+  const res = await api.delete(`/api/wishlist/${cleanId}`);
   wishlistIds.value.delete(cleanId);
   return res;
 }
 
 export async function loadWishlist() {
   try {
-    const list = await fetchWithAuth('/api/wishlist');
+    const list = await api.get('/api/wishlist');
     const newSet = new Set();
     list.forEach(item => {
       const cleanId = String(item.id).replace('g-', '');
