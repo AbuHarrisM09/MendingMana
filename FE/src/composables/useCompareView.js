@@ -250,6 +250,8 @@ export function useCompareView() {
   function goLogin() { router.push('/login'); }
   function goAdmin() { router.push('/admin'); }
   function goDashboard() { router.push('/dashboard'); }
+  function toggleProfile() { profileOpen.value = !profileOpen.value; }
+  function closeProfile() { profileOpen.value = false; }
 
   function logout() {
     localStorage.removeItem('token');
@@ -307,6 +309,8 @@ export function useCompareView() {
     goLogin,
     goAdmin,
     goDashboard,
+    toggleProfile,
+    closeProfile,
     logout
   };
 }

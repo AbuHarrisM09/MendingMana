@@ -75,7 +75,7 @@
             <template v-if="isAuthenticated">
               <div class="relative ml-1 sm:ml-2">
                 <button
-                  @click="profileOpen = !profileOpen"
+                  @click="toggleProfile()"
                   class="flex items-center gap-1.5 px-1.5 py-1 sm:gap-2 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-50 transition-colors focus:outline-none"
                 >
                   <img
@@ -96,15 +96,15 @@
                     </div>
                     
                     <template v-if="role === 'admin'">
-                      <button @click="goAdmin(); profileOpen = false" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
+                      <button @click="goAdmin(); closeProfile()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
                         <Shield class="w-4 h-4 text-red-500" /> Dashboard Admin
                       </button>
                     </template>
                     <template v-else>
-                      <button @click="goDashboard(); profileOpen = false" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
+                      <button @click="goDashboard(); closeProfile()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
                         <LayoutDashboard class="w-4 h-4 text-blue-500" /> Dashboard Saya
                       </button>
-                      <button @click="goDashboardWishlist(); profileOpen = false" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
+                      <button @click="goDashboardWishlist(); closeProfile()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
                         <Heart class="w-4 h-4 text-pink-500" /> Wishlist Saya
                       </button>
                     </template>
@@ -250,6 +250,8 @@ const {
   goAdmin,
   goDashboard,
   goDashboardWishlist,
+  toggleProfile,
+  closeProfile,
   logout,
   handleCategoryClick,
   handleSearch

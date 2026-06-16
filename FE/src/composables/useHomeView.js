@@ -55,6 +55,8 @@ export function useHomeView() {
   function goAdmin() { router.push('/admin'); }
   function goDashboard() { router.push('/dashboard'); }
   function goDashboardWishlist() { router.push('/dashboard'); }
+  function toggleProfile() { profileOpen.value = !profileOpen.value; }
+  function closeProfile() { profileOpen.value = false; }
 
   function logout() {
     localStorage.removeItem('token');
@@ -157,6 +159,8 @@ export function useHomeView() {
     goAdmin,
     goDashboard,
     goDashboardWishlist,
+    toggleProfile,
+    closeProfile,
     logout,
     handleCategoryClick,
     handleSearch

@@ -18,7 +18,7 @@
             <template v-if="isAuthenticated">
               <div class="relative ml-2">
                 <button
-                  @click="profileOpen = !profileOpen"
+                  @click="toggleProfile()"
                   class="flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-50 transition-colors focus:outline-none"
                 >
                   <img
@@ -39,12 +39,12 @@
                     </div>
                     
                     <template v-if="role === 'admin'">
-                      <button @click="goAdmin(); profileOpen = false" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
+                      <button @click="goAdmin(); closeProfile()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
                         <Shield class="w-4 h-4 text-red-500" /> Dashboard Admin
                       </button>
                     </template>
                     <template v-else>
-                      <button @click="goDashboard(); profileOpen = false" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
+                      <button @click="goDashboard(); closeProfile()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 w-full text-left transition-colors">
                         <LayoutDashboard class="w-4 h-4 text-blue-500" /> Dashboard Saya
                       </button>
                     </template>
@@ -318,6 +318,8 @@ const {
   goLogin,
   goAdmin,
   goDashboard,
+  toggleProfile,
+  closeProfile,
   logout
 } = useCompareView()
 </script>
