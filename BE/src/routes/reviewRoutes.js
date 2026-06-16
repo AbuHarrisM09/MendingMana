@@ -14,17 +14,30 @@ const router = express.Router();
  * POST   /api/reviews/:reviewId/vote    → Member: Vote (upvote/downvote) ulasan
  */
 
+const { invalidateCache } = require('../middlewares/cacheMiddleware');
+
+// Middleware helper to clear gadget and admin dashboard caches on review modifications
+const clearReviewCache = (req, res, next) => {
+  res.on('finish', () => {
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      invalidateCache('*gadgets*');
+      invalidateCache('*admin/dashboard*');
+    }
+  });
+  next();
+};
+
 // Publik: Lihat ulasan gadget (mendukung opsional auth untuk menandai vote milik user)
 router.get('/gadget/:id', optionalAuth, reviewController.getReviewsByGadget);
 
 // Member: Buat ulasan baru
-router.post('/gadget/:id', authenticate, reviewController.createReview);
+router.post('/gadget/:id', authenticate, clearReviewCache, reviewController.createReview);
 
 // Member: Edit ulasan sendiri
-router.put('/:reviewId', authenticate, reviewController.updateReview);
+router.put('/:reviewId', authenticate, clearReviewCache, reviewController.updateReview);
 
 // Member/Admin: Hapus ulasan
-router.delete('/:reviewId', authenticate, reviewController.deleteReview);
+router.delete('/:reviewId', authenticate, clearReviewCache, reviewController.deleteReview);
 
 // Member: Vote ulasan
 router.post('/:reviewId/vote', authenticate, reviewController.voteReview);
