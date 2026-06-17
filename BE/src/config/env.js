@@ -25,6 +25,13 @@ const env = {
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
   redisUrl: process.env.REDIS_URL || null,
+  smtp: {
+    host: process.env.SMTP_HOST || null,
+    port: toNumber(process.env.SMTP_PORT, 587),
+    user: process.env.SMTP_USER || null,
+    pass: process.env.SMTP_PASS || null,
+    from: process.env.SMTP_FROM || null,
+  },
 };
 
 module.exports = env;

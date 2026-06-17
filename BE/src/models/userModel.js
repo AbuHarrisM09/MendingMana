@@ -45,8 +45,21 @@ async function createUser({ fullName, email, passwordHash, roleId, username = nu
   return rows[0];
 }
 
+async function updateUserPassword(userId, passwordHash) {
+  const sql = `
+    UPDATE users
+    SET password_hash = $1
+    WHERE id = $2
+    RETURNING id, email
+  `;
+
+  const { rows } = await query(sql, [passwordHash, userId]);
+  return rows[0] || null;
+}
+
 module.exports = {
   findUserByEmail,
   findRoleByName,
   createUser,
+  updateUserPassword,
 };

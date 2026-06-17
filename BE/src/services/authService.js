@@ -1,7 +1,9 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
-const { findUserByEmail, findRoleByName, createUser } = require('../models/userModel');
+const { findUserByEmail, findRoleByName, createUser, updateUserPassword } = require('../models/userModel');
+const { generateOtp, storeOtp, verifyOtp } = require('./otpService');
+const { sendOtpEmail } = require('./mailService');
 
 const LOGIN_ALLOWED_ROLES = new Set(['member', 'admin']);
 const REGISTER_ALLOWED_ROLE = 'member';
@@ -220,9 +222,88 @@ async function loginOrRegisterGoogleUser({ email, fullName, profileImageUrl = nu
   };
 }
 
+async function forgotPasswordService(email) {
+  const user = await findUserByEmail(email);
+
+  if (!user) {
+    return {
+      success: false,
+      statusCode: 404,
+      message: 'Email tidak ditemukan di sistem kami.',
+    };
+  }
+
+  if (user.is_banned || isUserTemporarilyBanned(user.banned_until)) {
+    return {
+      success: false,
+      statusCode: 403,
+      message: 'Akun ini sedang diblokir. Hubungi admin untuk bantuan.',
+    };
+  }
+
+  const otp = generateOtp();
+  await storeOtp(email, otp);
+  await sendOtpEmail(email, otp);
+
+  return {
+    success: true,
+    statusCode: 200,
+    message: 'Kode OTP telah dikirim ke email Anda. Berlaku 5 menit.',
+  };
+}
+
+async function resetPasswordService({ email, otp, newPassword }) {
+  if (!email || !otp || !newPassword) {
+    return {
+      success: false,
+      statusCode: 400,
+      message: 'Email, kode OTP, dan password baru wajib diisi.',
+    };
+  }
+
+  if (String(newPassword).length < MIN_PASSWORD_LENGTH) {
+    return {
+      success: false,
+      statusCode: 400,
+      message: `Password baru minimal ${MIN_PASSWORD_LENGTH} karakter.`,
+    };
+  }
+
+  const otpResult = await verifyOtp(email, otp);
+
+  if (!otpResult.valid) {
+    return {
+      success: false,
+      statusCode: 400,
+      message: otpResult.reason,
+    };
+  }
+
+  const user = await findUserByEmail(email);
+
+  if (!user) {
+    return {
+      success: false,
+      statusCode: 404,
+      message: 'Email tidak ditemukan.',
+    };
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await updateUserPassword(user.id, passwordHash);
+
+  return {
+    success: true,
+    statusCode: 200,
+    message: 'Password berhasil diperbarui. Silakan login dengan password baru Anda.',
+  };
+}
+
 module.exports = {
   loginUser,
   registerUser,
   validateRegisterPayload,
   loginOrRegisterGoogleUser,
+  forgotPasswordService,
+  resetPasswordService,
 };
