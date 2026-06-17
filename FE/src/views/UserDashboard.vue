@@ -51,9 +51,14 @@
           <div class="flex-1">
             <div class="flex flex-col sm:flex-row sm:items-center justify-center md:justify-start gap-3 mb-1">
               <h1 class="text-white font-extrabold text-2xl md:text-3xl tracking-tight">{{ profile?.user?.fullName || 'Member' }}</h1>
-              <button @click="openEditModal" class="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold text-white transition-all shadow-inner self-center md:self-auto">
-                <Edit class="w-3.5 h-3.5" /> Edit Profil
-              </button>
+              <div class="flex gap-2">
+                <button @click="openEditModal" class="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold text-white transition-all shadow-inner">
+                  <Edit class="w-3.5 h-3.5" /> Edit Profil
+                </button>
+                <button v-if="!profile?.user?.isGoogle" @click="openPasswordModal" class="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold text-white transition-all shadow-inner">
+                  <Lock class="w-3.5 h-3.5" /> Ubah Password
+                </button>
+              </div>
             </div>
             <p class="text-slate-300 text-sm md:text-base mb-2 font-medium">{{ profile?.user?.email }}</p>
             <p v-if="profile?.user?.bio" class="text-slate-200 text-sm mb-3 font-medium leading-relaxed italic max-w-xl">
@@ -358,13 +363,89 @@
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Change Password Modal -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="showPasswordModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showPasswordModal = false"></div>
+          <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in z-10">
+            <div class="flex items-center gap-3 mb-5">
+              <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                <Lock class="w-5 h-5 text-slate-700" />
+              </div>
+              <div>
+                <h4 class="text-lg font-extrabold text-slate-900">Ubah Password</h4>
+                <p class="text-sm text-slate-500">Amankan akun Anda dengan password baru</p>
+              </div>
+            </div>
+
+            <form @submit.prevent="submitPasswordChange">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-1.5">Password Saat Ini</label>
+                  <input
+                    v-model="passwordForm.currentPassword"
+                    type="password"
+                    required
+                    placeholder="Masukkan password saat ini..."
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:ring-2 focus:ring-slate-800/20 focus:border-slate-800 outline-none transition-all placeholder:text-slate-400"
+                  />
+                  <span v-if="passwordErrors.currentPassword" class="text-xs text-red-500 mt-1 block font-semibold">{{ passwordErrors.currentPassword }}</span>
+                </div>
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-1.5">Password Baru</label>
+                  <input
+                    v-model="passwordForm.newPassword"
+                    type="password"
+                    required
+                    placeholder="Masukkan password baru (min 6 karakter)..."
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:ring-2 focus:ring-slate-800/20 focus:border-slate-800 outline-none transition-all placeholder:text-slate-400"
+                  />
+                  <span v-if="passwordErrors.newPassword" class="text-xs text-red-500 mt-1 block font-semibold">{{ passwordErrors.newPassword }}</span>
+                </div>
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-1.5">Konfirmasi Password Baru</label>
+                  <input
+                    v-model="passwordForm.confirmPassword"
+                    type="password"
+                    required
+                    placeholder="Ulangi password baru..."
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:ring-2 focus:ring-slate-800/20 focus:border-slate-800 outline-none transition-all placeholder:text-slate-400"
+                  />
+                  <span v-if="passwordErrors.confirmPassword" class="text-xs text-red-500 mt-1 block font-semibold">{{ passwordErrors.confirmPassword }}</span>
+                </div>
+              </div>
+
+              <div class="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  @click="showPasswordModal = false"
+                  class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  :disabled="passwordLoading"
+                  class="flex-1 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10"
+                >
+                  <div v-if="passwordLoading" class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                  Simpan Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import {
   MessageSquare, Heart, ChevronRight, CheckCircle, Package, Star, Home, LogOut,
-  Edit, User
+  Edit, User, Lock
 } from 'lucide-vue-next';
 import { useUserDashboard } from '../composables/useUserDashboard';
 
@@ -387,6 +468,12 @@ const {
   editForm,
   editErrors,
   openEditModal,
-  submitEdit
+  submitEdit,
+  showPasswordModal,
+  passwordLoading,
+  passwordForm,
+  passwordErrors,
+  openPasswordModal,
+  submitPasswordChange
 } = useUserDashboard();
 </script>

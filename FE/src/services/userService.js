@@ -35,3 +35,7 @@ export async function getUserReviews() {
 export async function updateUserProfile(payload) {
   return api.put('/api/user/profile', payload);
 }
+
+export async function changePassword(payload) {
+  return api.put('/api/user/change-password', payload);
+}

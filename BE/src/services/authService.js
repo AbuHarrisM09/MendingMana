@@ -212,6 +212,7 @@ async function loginOrRegisterGoogleUser({ email, fullName, profileImageUrl = nu
     sub: user.id,
     email: user.email,
     role: user.role_name,
+    isGoogle: true,
   };
 
   const token = jwt.sign(tokenPayload, env.jwtSecret, {
@@ -231,6 +232,7 @@ async function loginOrRegisterGoogleUser({ email, fullName, profileImageUrl = nu
         fullName: user.full_name,
         email: user.email,
         role: user.role_name,
+        isGoogle: true,
       },
     },
   };

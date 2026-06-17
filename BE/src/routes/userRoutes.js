@@ -9,6 +9,7 @@ router.use(authenticate);
 
 router.get('/profile', userController.getProfile);
 router.put('/profile', userController.updateProfile);
+router.put('/change-password', userController.changePassword);
 router.get('/wishlist', userController.getWishlist);
 router.get('/reviews', userController.getReviews);
 

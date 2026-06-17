@@ -1,4 +1,6 @@
 const profileModel = require('../models/profileModel');
+const bcrypt = require('bcrypt');
+const { findUserByEmail, updateUserPassword } = require('../models/userModel');
 
 exports.getProfile = async (req, res) => {
   const userId = req.user.sub;
@@ -19,6 +21,7 @@ exports.getProfile = async (req, res) => {
         bio: user.bio,
         profileImageUrl: user.profile_image_url,
         createdAt: user.created_at,
+        isGoogle: !!req.user.isGoogle,
       },
       stats: {
         totalReviews: Number(stats.total_reviews),
@@ -113,6 +116,46 @@ exports.updateProfile = async (req, res) => {
         createdAt: updatedUser.created_at,
       }
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Terjadi kesalahan pada server' });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  const userId = req.user.sub;
+  const email = req.user.email;
+  const isGoogle = req.user.isGoogle;
+
+  if (isGoogle) {
+    return res.status(400).json({ message: 'Pengguna login Google OAuth tidak dapat mengubah password.' });
+  }
+
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'Password saat ini dan password baru wajib diisi.' });
+  }
+
+  if (String(newPassword).length < 6) {
+    return res.status(400).json({ message: 'Password baru minimal 6 karakter.' });
+  }
+
+  try {
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!passwordMatch) {
+      return res.status(400).json({ message: 'Password saat ini salah.' });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    await updateUserPassword(userId, newPasswordHash);
+
+    res.json({ message: 'Password berhasil diperbarui.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Terjadi kesalahan pada server' });

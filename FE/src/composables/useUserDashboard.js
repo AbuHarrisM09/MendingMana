@@ -1,7 +1,7 @@
 import { ref, reactive, onMounted, computed } from 'vue';
 import logo from '../assets/logo.jpeg';
 import { useRouter } from 'vue-router';
-import { getUserProfile, getUserWishlist, getUserReviews, updateUserProfile } from '../services/userService';
+import { getUserProfile, getUserWishlist, getUserReviews, updateUserProfile, changePassword } from '../services/userService';
 import { LayoutDashboard, MessageSquare, Heart } from 'lucide-vue-next';
 import { removeFromWishlist } from '../services/wishlistService';
 import { useToast } from './useToast';
@@ -144,6 +144,69 @@ export function useUserDashboard() {
     }
   }
 
+  // ─── CHANGE PASSWORD ───
+  const showPasswordModal = ref(false);
+  const passwordLoading = ref(false);
+  const passwordForm = reactive({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const passwordErrors = reactive({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  function openPasswordModal() {
+    passwordForm.currentPassword = '';
+    passwordForm.newPassword = '';
+    passwordForm.confirmPassword = '';
+    passwordErrors.currentPassword = '';
+    passwordErrors.newPassword = '';
+    passwordErrors.confirmPassword = '';
+    showPasswordModal.value = true;
+  }
+
+  async function submitPasswordChange() {
+    let hasError = false;
+    passwordErrors.currentPassword = '';
+    passwordErrors.newPassword = '';
+    passwordErrors.confirmPassword = '';
+
+    if (!passwordForm.currentPassword) {
+      passwordErrors.currentPassword = 'Password saat ini wajib diisi.';
+      hasError = true;
+    }
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
+      passwordErrors.newPassword = 'Password baru minimal 6 karakter.';
+      hasError = true;
+    }
+    if (passwordForm.confirmPassword !== passwordForm.newPassword) {
+      passwordErrors.confirmPassword = 'Konfirmasi password tidak cocok.';
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    passwordLoading.value = true;
+    try {
+      await changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+
+      showPasswordModal.value = false;
+      const { showToast } = useToast();
+      showToast('Password Anda berhasil diubah.', 'success');
+    } catch (err) {
+      const { showToast } = useToast();
+      showToast(err.message || 'Gagal mengubah password.', 'error');
+    } finally {
+      passwordLoading.value = false;
+    }
+  }
+
   return {
     logo,
     loading,
@@ -164,6 +227,12 @@ export function useUserDashboard() {
     editForm,
     editErrors,
     openEditModal,
-    submitEdit
+    submitEdit,
+    showPasswordModal,
+    passwordLoading,
+    passwordForm,
+    passwordErrors,
+    openPasswordModal,
+    submitPasswordChange
   };
 }
