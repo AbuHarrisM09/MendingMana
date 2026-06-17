@@ -266,6 +266,48 @@
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Unban Modal -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="showUnbanModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showUnbanModal = false"></div>
+          <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-scale-in z-10">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                <ShieldCheck class="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <h4 class="text-lg font-extrabold text-slate-900">Unban Pengguna</h4>
+                <p class="text-sm text-slate-500">{{ unbanTarget?.fullName }}</p>
+              </div>
+            </div>
+
+            <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+              Apakah Anda yakin ingin membuka blokir akun <strong>{{ unbanTarget?.fullName }}</strong>? Pengguna ini akan dapat mengakses dan menggunakan akunnya kembali.
+            </p>
+
+            <div class="flex gap-3">
+              <button
+                @click="showUnbanModal = false"
+                class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                @click="confirmUnban"
+                :disabled="unbanLoading"
+                class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-500 transition-colors disabled:opacity-60 shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
+              >
+                <div v-if="unbanLoading" class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                <ShieldCheck v-else class="w-4 h-4" />
+                Ya, Unban
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -276,6 +318,9 @@ import {
   Users, UserCheck, Search, ShieldBan, ShieldCheck,
   MessageSquare, ChevronLeft, ChevronRight,
 } from "lucide-vue-next";
+import { useToast } from "../../composables/useToast";
+
+const { showToast } = useToast();
 
 // ─── State ───
 const users = ref([]);
@@ -293,6 +338,10 @@ const banTarget = ref(null);
 const banReason = ref("");
 const banDuration = ref("");
 const banLoading = ref(false);
+
+const showUnbanModal = ref(false);
+const unbanTarget = ref(null);
+const unbanLoading = ref(false);
 
 const statusFilters = [
   { label: "Semua", value: "all" },
@@ -385,24 +434,36 @@ async function handleBan() {
     });
 
     showBanModal.value = false;
+    showToast(`Pengguna ${banTarget.value.fullName} berhasil di-ban.`, "success");
     await fetchUsers();
   } catch (err) {
-    alert(err.response?.data?.message || "Gagal mem-ban pengguna.");
+    showToast(err.response?.data?.message || "Gagal mem-ban pengguna.", "error");
   } finally {
     banLoading.value = false;
   }
 }
 
-async function handleUnban(user) {
-  if (!confirm(`Yakin ingin meng-unban ${user.fullName}?`)) return;
+function handleUnban(user) {
+  unbanTarget.value = user;
+  unbanLoading.value = false;
+  showUnbanModal.value = true;
+}
+
+async function confirmUnban() {
+  if (!unbanTarget.value) return;
+  unbanLoading.value = true;
   try {
     const token = localStorage.getItem("token");
-    await axios.patch(`/api/admin/users/${user.id}/unban`, {}, {
+    await axios.patch(`/api/admin/users/${unbanTarget.value.id}/unban`, {}, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    showUnbanModal.value = false;
+    showToast(`Pengguna ${unbanTarget.value.fullName} berhasil di-unban.`, "success");
     await fetchUsers();
   } catch (err) {
-    alert(err.response?.data?.message || "Gagal meng-unban pengguna.");
+    showToast(err.response?.data?.message || "Gagal meng-unban pengguna.", "error");
+  } finally {
+    unbanLoading.value = false;
   }
 }
 

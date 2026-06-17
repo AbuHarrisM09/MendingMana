@@ -20,6 +20,18 @@ function isUserBanned(user) {
   return Number.isNaN(bannedDate.getTime()) ? false : bannedDate > new Date();
 }
 
+function getBanMessage(user) {
+  if (user.banned_until) {
+    const dateStr = new Date(user.banned_until).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    return `Akun Anda ditangguhkan sementara hingga tanggal ${dateStr} karena melanggar Ketentuan Layanan kami.`;
+  }
+  return 'Akun Anda telah ditangguhkan secara permanen karena melanggar Ketentuan Layanan kami.';
+}
+
 async function loginUser({ email, password }) {
   const user = await findUserByEmail(email);
 
@@ -35,7 +47,7 @@ async function loginUser({ email, password }) {
     return {
       success: false,
       statusCode: 403,
-      message: user.banned_reason || 'Akun Anda sedang diblokir.',
+      message: getBanMessage(user),
     };
   }
 
@@ -191,7 +203,7 @@ async function loginOrRegisterGoogleUser({ email, fullName, profileImageUrl = nu
     return {
       success: false,
       statusCode: 403,
-      message: user.banned_reason || 'Akun Anda sedang diblokir.',
+      message: getBanMessage(user),
     };
   }
 
@@ -239,7 +251,7 @@ async function forgotPasswordService(email) {
     return {
       success: false,
       statusCode: 403,
-      message: 'Akun ini sedang diblokir. Hubungi admin untuk bantuan.',
+      message: getBanMessage(user),
     };
   }
 
