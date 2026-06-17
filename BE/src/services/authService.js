@@ -9,12 +9,14 @@ const LOGIN_ALLOWED_ROLES = new Set(['member', 'admin']);
 const REGISTER_ALLOWED_ROLE = 'member';
 const MIN_PASSWORD_LENGTH = 6;
 
-function isUserTemporarilyBanned(bannedUntil) {
-  if (!bannedUntil) {
+function isUserBanned(user) {
+  if (!user.is_banned) {
     return false;
   }
-
-  const bannedDate = new Date(bannedUntil);
+  if (!user.banned_until) {
+    return true; // Ban permanen
+  }
+  const bannedDate = new Date(user.banned_until);
   return Number.isNaN(bannedDate.getTime()) ? false : bannedDate > new Date();
 }
 
@@ -29,7 +31,7 @@ async function loginUser({ email, password }) {
     };
   }
 
-  if (user.is_banned || isUserTemporarilyBanned(user.banned_until)) {
+  if (isUserBanned(user)) {
     return {
       success: false,
       statusCode: 403,
@@ -185,7 +187,7 @@ async function loginOrRegisterGoogleUser({ email, fullName, profileImageUrl = nu
   }
 
   // 3. Cek status blokir/ban
-  if (user.is_banned || isUserTemporarilyBanned(user.banned_until)) {
+  if (isUserBanned(user)) {
     return {
       success: false,
       statusCode: 403,
@@ -233,7 +235,7 @@ async function forgotPasswordService(email) {
     };
   }
 
-  if (user.is_banned || isUserTemporarilyBanned(user.banned_until)) {
+  if (isUserBanned(user)) {
     return {
       success: false,
       statusCode: 403,
@@ -243,7 +245,11 @@ async function forgotPasswordService(email) {
 
   const otp = generateOtp();
   await storeOtp(email, otp);
-  await sendOtpEmail(email, otp);
+  
+  // Kirim email di background agar API merespons dengan cepat tanpa menunggu proses SMTP selesai
+  sendOtpEmail(email, otp).catch((err) => {
+    console.error(`Gagal mengirim email OTP ke ${email}:`, err.message);
+  });
 
   return {
     success: true,

@@ -15,7 +15,7 @@ async function getOverviewStats() {
       WHERE r.name = 'member'
         AND (
           u.is_banned = TRUE
-          OR (u.banned_until IS NOT NULL AND u.banned_until > NOW())
+          AND (u.banned_until IS NULL OR u.banned_until > NOW())
         )
     ),
     gadget_count AS (

@@ -82,8 +82,7 @@
           <div class="bg-white/70 backdrop-blur-xl border border-white shadow-xl shadow-slate-100/50 p-6 rounded-3xl animate-fade-in-up relative z-20">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Fitur Komparasi</span>
-                <h1 class="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-2">Bandingkan Spek Gadget</h1>
+                <h1 class="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Bandingkan Spek Gadget</h1>
                 <p class="text-xs sm:text-sm text-slate-500 mt-1">Cari dan pilih hingga 4 gadget untuk dibandingkan spesifikasinya secara berdampingan.</p>
               </div>
               
