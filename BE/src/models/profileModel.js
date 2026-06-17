@@ -61,9 +61,24 @@ async function findReviewsByUser(userId) {
   return rows;
 }
 
+/**
+ * Update data profil user (Nama Lengkap dan Bio) di database.
+ */
+async function updateUserProfile(userId, { fullName, bio }) {
+  const sql = `
+    UPDATE users
+    SET full_name = $1, bio = $2, updated_at = NOW()
+    WHERE id = $3
+    RETURNING id, full_name, username, email, bio, profile_image_url, created_at
+  `;
+  const { rows } = await query(sql, [fullName, bio, userId]);
+  return rows[0] || null;
+}
+
 module.exports = {
   findUserProfileById,
   getUserStats,
   findWishlistByUser,
   findReviewsByUser,
+  updateUserProfile,
 };

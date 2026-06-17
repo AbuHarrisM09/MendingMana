@@ -82,3 +82,39 @@ exports.getReviews = async (req, res) => {
     res.status(500).json({ message: 'Terjadi kesalahan pada server' });
   }
 };
+
+exports.updateProfile = async (req, res) => {
+  const userId = req.user.sub;
+  const { fullName, bio } = req.body;
+
+  if (!fullName || String(fullName).trim().length < 3) {
+    return res.status(400).json({ message: 'Nama lengkap wajib diisi dan minimal 3 karakter.' });
+  }
+
+  try {
+    const updatedUser = await profileModel.updateUserProfile(userId, {
+      fullName: String(fullName).trim(),
+      bio: bio ? String(bio).trim() : null
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    res.json({
+      message: 'Profil berhasil diperbarui.',
+      user: {
+        id: updatedUser.id,
+        fullName: updatedUser.full_name,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        bio: updatedUser.bio,
+        profileImageUrl: updatedUser.profile_image_url,
+        createdAt: updatedUser.created_at,
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Terjadi kesalahan pada server' });
+  }
+};

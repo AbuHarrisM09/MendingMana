@@ -1,7 +1,7 @@
-import { ref, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import logo from '../assets/logo.jpeg';
 import { useRouter } from 'vue-router';
-import { getUserProfile, getUserWishlist, getUserReviews } from '../services/userService';
+import { getUserProfile, getUserWishlist, getUserReviews, updateUserProfile } from '../services/userService';
 import { LayoutDashboard, MessageSquare, Heart } from 'lucide-vue-next';
 import { removeFromWishlist } from '../services/wishlistService';
 import { useToast } from './useToast';
@@ -94,6 +94,56 @@ export function useUserDashboard() {
     }
   }
 
+  // ─── EDIT PROFILE ───
+  const showEditModal = ref(false);
+  const editLoading = ref(false);
+  const editForm = reactive({
+    fullName: '',
+    bio: '',
+  });
+  const editErrors = reactive({
+    fullName: '',
+  });
+
+  function openEditModal() {
+    editForm.fullName = profile.value?.user?.fullName || '';
+    editForm.bio = profile.value?.user?.bio || '';
+    editErrors.fullName = '';
+    showEditModal.value = true;
+  }
+
+  async function submitEdit() {
+    if (!editForm.fullName || editForm.fullName.trim().length < 3) {
+      editErrors.fullName = 'Nama lengkap minimal 3 karakter.';
+      return;
+    }
+
+    editLoading.value = true;
+    try {
+      const res = await updateUserProfile({
+        fullName: editForm.fullName,
+        bio: editForm.bio,
+      });
+
+      // Update state local
+      if (profile.value) {
+        profile.value.user.fullName = res.user.fullName;
+        profile.value.user.bio = res.user.bio;
+        // Simpan nama baru ke cache localStorage
+        localStorage.setItem("userFullName", res.user.fullName);
+      }
+
+      showEditModal.value = false;
+      const { showToast } = useToast();
+      showToast('Profil Anda berhasil diperbarui.', 'success');
+    } catch (err) {
+      const { showToast } = useToast();
+      showToast(err.message || 'Gagal memperbarui profil.', 'error');
+    } finally {
+      editLoading.value = false;
+    }
+  }
+
   return {
     logo,
     loading,
@@ -108,6 +158,12 @@ export function useUserDashboard() {
     formatPrice,
     logout,
     loadData,
-    handleRemoveWishlist
+    handleRemoveWishlist,
+    showEditModal,
+    editLoading,
+    editForm,
+    editErrors,
+    openEditModal,
+    submitEdit
   };
 }

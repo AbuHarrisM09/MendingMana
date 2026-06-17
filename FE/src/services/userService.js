@@ -31,3 +31,7 @@ export async function getUserWishlist() {
 export async function getUserReviews() {
   return api.get('/api/user/reviews');
 }
+
+export async function updateUserProfile(payload) {
+  return api.put('/api/user/profile', payload);
+}

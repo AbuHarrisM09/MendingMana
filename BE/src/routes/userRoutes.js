@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get('/profile', userController.getProfile);
+router.put('/profile', userController.updateProfile);
 router.get('/wishlist', userController.getWishlist);
 router.get('/reviews', userController.getReviews);
 
