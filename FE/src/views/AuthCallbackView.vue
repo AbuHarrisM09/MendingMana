@@ -68,6 +68,7 @@ onMounted(async () => {
     localStorage.setItem('userEmail', response.data.user.email || '');
     localStorage.setItem('userAvatar', response.data.user.profileImageUrl || '');
     localStorage.setItem('user', JSON.stringify(response.data.user));
+    localStorage.setItem('loginMethod', 'google');
     
     // Dispatch event agar state global reaktif di navbar ter-update
     window.dispatchEvent(new Event('storage'));

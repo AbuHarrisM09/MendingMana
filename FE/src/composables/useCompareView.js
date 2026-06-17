@@ -258,6 +258,9 @@ export function useCompareView() {
     localStorage.removeItem('role');
     localStorage.removeItem('userFullName');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userAvatar');
+    localStorage.removeItem('user');
+    localStorage.removeItem('loginMethod');
     
     token.value = '';
     role.value = '';

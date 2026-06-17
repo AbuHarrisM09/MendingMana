@@ -55,7 +55,7 @@
                 <button @click="openEditModal" class="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold text-white transition-all shadow-inner">
                   <Edit class="w-3.5 h-3.5" /> Edit Profil
                 </button>
-                <button v-if="!profile?.user?.isGoogle" @click="openPasswordModal" class="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold text-white transition-all shadow-inner">
+                <button v-if="!isGoogleUser" @click="openPasswordModal" class="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold text-white transition-all shadow-inner">
                   <Lock class="w-3.5 h-3.5" /> Ubah Password
                 </button>
               </div>
@@ -474,6 +474,7 @@ const {
   passwordForm,
   passwordErrors,
   openPasswordModal,
-  submitPasswordChange
+  submitPasswordChange,
+  isGoogleUser
 } = useUserDashboard();
 </script>

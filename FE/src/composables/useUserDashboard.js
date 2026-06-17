@@ -45,6 +45,9 @@ export function useUserDashboard() {
     localStorage.removeItem('role');
     localStorage.removeItem('userFullName');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userAvatar');
+    localStorage.removeItem('user');
+    localStorage.removeItem('loginMethod');
     const { showToast } = useToast();
     showToast('Anda berhasil keluar dari akun.', 'success');
     router.push('/login');
@@ -145,6 +148,14 @@ export function useUserDashboard() {
   }
 
   // ─── CHANGE PASSWORD ───
+  const isGoogleUser = computed(() => {
+    return !!(
+      profile.value?.user?.isGoogle ||
+      profile.value?.user?.profileImageUrl?.includes('googleusercontent.com') ||
+      localStorage.getItem('loginMethod') === 'google'
+    );
+  });
+
   const showPasswordModal = ref(false);
   const passwordLoading = ref(false);
   const passwordForm = reactive({
@@ -159,6 +170,11 @@ export function useUserDashboard() {
   });
 
   function openPasswordModal() {
+    if (isGoogleUser.value) {
+      const { showToast } = useToast();
+      showToast('Akun Google OAuth tidak memerlukan penggantian password.', 'error');
+      return;
+    }
     passwordForm.currentPassword = '';
     passwordForm.newPassword = '';
     passwordForm.confirmPassword = '';
@@ -169,6 +185,11 @@ export function useUserDashboard() {
   }
 
   async function submitPasswordChange() {
+    if (isGoogleUser.value) {
+      const { showToast } = useToast();
+      showToast('Akun Google OAuth tidak diperbolehkan mengubah password.', 'error');
+      return;
+    }
     let hasError = false;
     passwordErrors.currentPassword = '';
     passwordErrors.newPassword = '';
@@ -233,6 +254,7 @@ export function useUserDashboard() {
     passwordForm,
     passwordErrors,
     openPasswordModal,
-    submitPasswordChange
+    submitPasswordChange,
+    isGoogleUser
   };
 }
