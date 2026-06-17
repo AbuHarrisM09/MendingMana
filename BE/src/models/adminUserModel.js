@@ -17,9 +17,9 @@ async function getAllMembers({ search = '', status = 'all', page = 1, limit = 15
   }
 
   if (status === 'active') {
-    whereClause += ` AND (u.is_banned = FALSE AND (u.banned_until IS NULL OR u.banned_until <= NOW()))`;
+    whereClause += ` AND (u.is_banned = FALSE OR (u.banned_until IS NOT NULL AND u.banned_until <= NOW()))`;
   } else if (status === 'banned') {
-    whereClause += ` AND (u.is_banned = TRUE OR (u.banned_until IS NOT NULL AND u.banned_until > NOW()))`;
+    whereClause += ` AND (u.is_banned = TRUE AND (u.banned_until IS NULL OR u.banned_until > NOW()))`;
   }
 
   // Count query
